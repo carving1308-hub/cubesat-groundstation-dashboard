@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Ground Station Icon & Marker
         const gsIcon = L.divIcon({
             className: 'gs-map-icon',
-            html: `<div style="background:#FFB703; width:14px; height:14px; border-radius:50%; border:2px solid #FFF; box-shadow:0 0 12px #FFB703;"></div>`,
+            html: `<div style="background:#2563EB; width:14px; height:14px; border-radius:50%; border:2px solid #FFF; box-shadow:0 0 12px #2563EB;"></div>`,
             iconSize: [14, 14]
         });
         groundStationMarker = L.marker([gsLat, gsLon], { icon: gsIcon }).addTo(map);
@@ -119,8 +119,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const satIcon = L.divIcon({
             className: 'sat-map-icon',
             html: `<div style="position:relative; width:18px; height:18px;">
-                    <div style="background:#00F0FF; width:14px; height:14px; border-radius:50%; border:2px solid #FFF; box-shadow:0 0 14px #00F0FF;"></div>
-                    <div style="position:absolute; top:-4px; left:-4px; width:22px; height:22px; border:2px solid #00F0FF; border-radius:50%; animation: pulse 1.5s infinite; opacity:0.6;"></div>
+                    <div style="background:#0284C7; width:14px; height:14px; border-radius:50%; border:2px solid #FFF; box-shadow:0 0 14px #0284C7;"></div>
+                    <div style="position:absolute; top:-4px; left:-4px; width:22px; height:22px; border:2px solid #0284C7; border-radius:50%; animation: pulse 1.5s infinite; opacity:0.6;"></div>
                    </div>`,
             iconSize: [18, 18]
         });
@@ -129,8 +129,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Coverage Footprint Circle
         footprintCircle = L.circle([gsLat, gsLon], {
             radius: 500000, // ~500 km radius
-            color: '#00F0FF',
-            fillColor: '#00F0FF',
+            color: '#0284C7',
+            fillColor: '#0284C7',
             fillOpacity: 0.08,
             weight: 1,
             dashArray: '4, 4'
@@ -138,7 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Orbit Ground Track Line
         orbitPolyline = L.polyline([[gsLat, gsLon]], {
-            color: '#00F0FF',
+            color: '#2563EB',
             weight: 2,
             opacity: 0.85,
             dashArray: '6, 6'

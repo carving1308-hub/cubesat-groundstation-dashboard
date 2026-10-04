@@ -4,21 +4,21 @@
  * ------------------------------------------------------------------- */
 
 :root {
-    --bg-main: #F4EFE6;
-    --bg-card: #FFFDF9;
-    --bg-card-header: #EFE7DB;
-    --border-color: #DFD3C3;
-    --border-highlight: #C5A880;
+    --bg-main: #F0F4F8;
+    --bg-card: #FFFFFF;
+    --bg-card-header: #EBF3FA;
+    --border-color: #CBD5E1;
+    --border-highlight: #2563EB;
     
-    --text-primary: #2C2416;
-    --text-muted: #5C5243;
-    --text-dim: #8A7B68;
+    --text-primary: #0F172A;
+    --text-muted: #334155;
+    --text-dim: #64748B;
     
     --accent-cyan: #0284C7;
-    --accent-emerald: #15803D;
-    --accent-amber: #B45309;
-    --accent-red: #B91C1C;
-    --accent-purple: #6D28D9;
+    --accent-emerald: #059669;
+    --accent-amber: #D97706;
+    --accent-red: #DC2626;
+    --accent-purple: #4F46E5;
     
     --font-mono: 'JetBrains Mono', 'Fira Code', 'Roboto Mono', monospace;
     --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
@@ -39,9 +39,9 @@ body {
     display: flex;
     flex-direction: column;
     background-image: 
-        radial-gradient(circle at 50% 0%, rgba(197, 168, 128, 0.12) 0%, transparent 60%),
-        radial-gradient(circle at 100% 100%, rgba(180, 83, 9, 0.05) 0%, transparent 50%),
-        linear-gradient(to bottom, #FAF6F0, #F4EFE6);
+        radial-gradient(circle at 50% 0%, rgba(37, 99, 235, 0.08) 0%, transparent 60%),
+        radial-gradient(circle at 100% 100%, rgba(2, 132, 199, 0.06) 0%, transparent 50%),
+        linear-gradient(to bottom, #F8FAFC, #EFF6FF);
 }
 
 /* -------------------------------------------------------------------
@@ -49,13 +49,13 @@ body {
  * ------------------------------------------------------------------- */
 .app-header {
     height: 54px;
-    background: #FFFDF9;
+    background: #FFFFFF;
     border-bottom: 1px solid var(--border-color);
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0 16px;
-    box-shadow: 0 1px 4px rgba(44, 36, 22, 0.06);
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06);
     z-index: 100;
 }
 
@@ -66,9 +66,9 @@ body {
 }
 
 .sat-badge {
-    background: #F5EBE0;
-    color: #B45309;
-    border: 1px solid #E6CCB2;
+    background: #EFF6FF;
+    color: #1D4ED8;
+    border: 1px solid #BFDBFE;
     padding: 3px 8px;
     border-radius: 4px;
     font-family: var(--font-mono);
@@ -81,12 +81,12 @@ body {
     font-size: 1.05rem;
     font-weight: 800;
     letter-spacing: 1.5px;
-    color: #2C2416;
+    color: #0F172A;
     text-transform: uppercase;
 }
 
 .brand-title span {
-    color: var(--accent-amber);
+    color: var(--accent-cyan);
 }
 
 /* Timer Display HH:MM:SS */
@@ -100,8 +100,8 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    background: #F7F1E5;
-    border: 1px solid #DFD3C3;
+    background: #F8FAFC;
+    border: 1px solid #CBD5E1;
     padding: 3px 12px;
     border-radius: 4px;
 }
@@ -134,10 +134,10 @@ body {
     gap: 6px;
     font-size: 0.75rem;
     font-family: var(--font-mono);
-    background: #F7F1E5;
+    background: #F8FAFC;
     padding: 4px 10px;
     border-radius: 20px;
-    border: 1px solid #DFD3C3;
+    border: 1px solid #CBD5E1;
     color: var(--text-primary);
 }
 
@@ -166,9 +166,9 @@ body {
 }
 
 .btn-reset-dash {
-    background: #FEF3C7;
-    border: 1px solid var(--accent-amber);
-    color: #B45309;
+    background: #EFF6FF;
+    border: 1px solid #2563EB;
+    color: #1D4ED8;
     padding: 5px 12px;
     border-radius: 4px;
     font-family: var(--font-mono);
@@ -182,9 +182,9 @@ body {
 }
 
 .btn-reset-dash:hover {
-    background: var(--accent-amber);
+    background: #2563EB;
     color: #FFFFFF;
-    box-shadow: 0 2px 8px rgba(217, 119, 6, 0.3);
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
 }
 
 .btn-toggle-source {
@@ -639,8 +639,8 @@ body {
     align-items: center;
     justify-content: space-between;
     padding: 6px 10px;
-    background: #F7F1E5;
-    border-bottom: 1px solid #DFD3C3;
+    background: #F8FAFC;
+    border-bottom: 1px solid #CBD5E1;
 }
 
 .big-val-box {
@@ -687,8 +687,8 @@ canvas.telemetry-chart {
     grid-template-columns: 1fr 1fr;
     gap: 4px;
     padding: 4px 8px;
-    background: #F7F1E5;
-    border-top: 1px solid #DFD3C3;
+    background: #F8FAFC;
+    border-top: 1px solid #CBD5E1;
 }
 
 .sub-metric-item {
@@ -708,7 +708,7 @@ canvas.telemetry-chart {
  * ------------------------------------------------------------------- */
 .app-footer {
     height: 30px;
-    background: #FFFDF9;
+    background: #FFFFFF;
     border-top: 1px solid var(--border-color);
     display: flex;
     align-items: center;
@@ -718,7 +718,7 @@ canvas.telemetry-chart {
     font-size: 0.7rem;
     color: var(--text-muted);
     z-index: 100;
-    box-shadow: 0 -1px 3px rgba(44, 36, 22, 0.04);
+    box-shadow: 0 -1px 3px rgba(15, 23, 42, 0.04);
 }
 
 .footer-timer-group {
@@ -748,7 +748,7 @@ canvas.telemetry-chart {
  * ------------------------------------------------------------------- */
 .lora-toolbar {
     height: 38px;
-    background: #FFFDF9;
+    background: #FFFFFF;
     border-bottom: 1px solid var(--border-color);
     display: flex;
     align-items: center;
@@ -756,7 +756,7 @@ canvas.telemetry-chart {
     padding: 0 16px;
     z-index: 90;
     font-family: var(--font-mono);
-    box-shadow: 0 1px 3px rgba(44, 36, 22, 0.04);
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
 }
 
 .lora-bar-left,
@@ -799,8 +799,8 @@ canvas.telemetry-chart {
 .lora-param-pill {
     font-size: 0.68rem;
     color: var(--text-muted);
-    background: #F7F1E5;
-    border: 1px solid #DFD3C3;
+    background: #F8FAFC;
+    border: 1px solid #CBD5E1;
     padding: 3px 8px;
     border-radius: 4px;
 }
@@ -819,8 +819,8 @@ canvas.telemetry-chart {
 }
 
 .lora-select {
-    background: #F7F1E5;
-    border: 1px solid #DFD3C3;
+    background: #F8FAFC;
+    border: 1px solid #CBD5E1;
     color: var(--text-primary);
     font-family: var(--font-mono);
     font-size: 0.72rem;

@@ -47,8 +47,8 @@ The system features standard **CCSDS Space Packet (CCSDS 133.0-B-2)** decoding, 
 - **REST Flashing API** (`POST /api/obc/flash`): Compiles and uploads binary firmware directly to the connected OBC receiver board on `COM7`.
 
 ### 🎨 Theme Support
-- **Warm Cream Texture Theme**: Elegant ivory/linen texture palette with warm espresso typography and amber accents.
-- **Professional Light Theme**: High-contrast slate and sky blue dashboard interface.
+- **Professional Blue & White Aerospace Theme**: Clean, crisp slate-white background with high-contrast royal blue, deep navy, and sky blue accents designed for high-density mission control environments.
+- **Dark & Light Mode Compatible**: Optimized for readability on ground station displays.
 
 ---
 
