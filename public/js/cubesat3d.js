@@ -1,6 +1,7 @@
 /**
- * 3D 6U CubeSat Model & Real-Time Motion/Orientation Visualizer
- * Built using Three.js
+ * 3D Space Day CAD Model & Real-Time Motion/Orientation Visualizer
+ * Parses converted STEP CAD geometry (Space Day.step -> models/space_day.json)
+ * Driven by real-time MPU-9250 IMU Pitch, Roll, and Yaw Telemetry.
  */
 
 class CubeSat3D {
@@ -12,6 +13,7 @@ class CubeSat3D {
         this.camera = null;
         this.renderer = null;
         this.cubeSatGroup = null;
+        this.cadModelGroup = null;
         this.coreLight = null;
         this.controls = null;
         
@@ -48,29 +50,35 @@ class CubeSat3D {
         this.container.appendChild(this.renderer.domElement);
 
         // 4. Lights
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
         this.scene.add(ambientLight);
 
-        const dirLight1 = new THREE.DirectionalLight(0x00f0ff, 1.2);
+        const dirLight1 = new THREE.DirectionalLight(0x0284c7, 1.4);
         dirLight1.position.set(5, 10, 7);
         this.scene.add(dirLight1);
 
-        const dirLight2 = new THREE.DirectionalLight(0xffb703, 0.8);
+        const dirLight2 = new THREE.DirectionalLight(0x38bdf8, 0.9);
         dirLight2.position.set(-5, -5, -5);
         this.scene.add(dirLight2);
 
         // Internal Thermal Glow PointLight
-        this.coreLight = new THREE.PointLight(0x00f0ff, 2, 3);
+        this.coreLight = new THREE.PointLight(0x0284c7, 2, 4);
         this.coreLight.position.set(0, 0, 0);
         this.scene.add(this.coreLight);
 
-        // 5. Build 6U CubeSat Geometry
-        this.buildCubeSat();
+        // 5. Root Orientation Group
+        this.cubeSatGroup = new THREE.Group();
 
-        // 6. Grid Helper / Coordinate Axes
-        const gridHelper = new THREE.GridHelper(10, 20, 0x00f0ff, 0x1d2a44);
+        // 6. Build Fallback Frame & Load Space Day.step CAD Model
+        this.buildFallbackFrame();
+        this.loadSpaceDayCadModel();
+
+        // 7. Grid Helper / Coordinate Reference Grid
+        const gridHelper = new THREE.GridHelper(10, 20, 0x0284c7, 0x334155);
         gridHelper.position.y = -2;
         this.scene.add(gridHelper);
+
+        this.scene.add(this.cubeSatGroup);
 
         // Resize Listener
         window.addEventListener('resize', () => this.onWindowResize());
@@ -79,104 +87,109 @@ class CubeSat3D {
         this.animate();
     }
 
-    buildCubeSat() {
-        this.cubeSatGroup = new THREE.Group();
-
-        // 6U Dimensions Aspect Ratio: 10cm x 20cm x 30cm => (X: 1.0, Y: 3.0, Z: 2.0)
+    buildFallbackFrame() {
+        // Temporary placeholder geometry while CAD model loads
         const width = 1.0;
         const height = 3.0;
         const depth = 2.0;
 
-        // Main Aluminum Chassis Frame
-        const chassisGeo = new THREE.BoxGeometry(width, height, depth);
-        const chassisMat = new THREE.MeshStandardMaterial({
-            color: 0x1A2234,
-            metalness: 0.85,
-            roughness: 0.25,
-            wireframe: false
-        });
-        const chassis = new THREE.Mesh(chassisGeo, chassisMat);
-        this.cubeSatGroup.add(chassis);
-
-        // Solar Panel Cell Overlays (Dark Blue with Grid Lines)
-        const panelMat = new THREE.MeshStandardMaterial({
-            color: 0x0B1B3D,
-            metalness: 0.9,
-            roughness: 0.1,
-            emissive: 0x001133
-        });
-
-        // External Solar Faces (+X, -X, +Z, -Z)
-        const sidePanelGeoZ = new THREE.PlaneGeometry(width * 0.9, height * 0.95);
-        const frontPanel = new THREE.Mesh(sidePanelGeoZ, panelMat);
-        frontPanel.position.z = depth / 2 + 0.01;
-        this.cubeSatGroup.add(frontPanel);
-
-        const backPanel = new THREE.Mesh(sidePanelGeoZ, panelMat);
-        backPanel.position.z = -depth / 2 - 0.01;
-        backPanel.rotation.y = Math.PI;
-        this.cubeSatGroup.add(backPanel);
-
-        // Deployable Solar Wings (+X and -X sides)
-        const wingWidth = 1.8;
-        const wingHeight = height * 0.9;
-        const wingGeo = new THREE.BoxGeometry(wingWidth, wingHeight, 0.05);
-        
-        // Right Wing (+X)
-        const rightWing = new THREE.Mesh(wingGeo, panelMat);
-        rightWing.position.set(width / 2 + wingWidth / 2 + 0.05, 0, 0);
-        this.cubeSatGroup.add(rightWing);
-
-        // Left Wing (-X)
-        const leftWing = new THREE.Mesh(wingGeo, panelMat);
-        leftWing.position.set(-width / 2 - wingWidth / 2 - 0.05, 0, 0);
-        this.cubeSatGroup.add(leftWing);
-
-        // Payload Camera Aperture Lens (+Y Top Face)
-        const lensGroup = new THREE.Group();
-        const lensHousingGeo = new THREE.CylinderGeometry(0.35, 0.4, 0.3, 32);
-        const lensHousingMat = new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.95, roughness: 0.1 });
-        const lensHousing = new THREE.Mesh(lensHousingGeo, lensHousingMat);
-        
-        const glassGeo = new THREE.CylinderGeometry(0.3, 0.3, 0.32, 32);
-        const glassMat = new THREE.MeshPhysicalMaterial({
-            color: 0x00f0ff,
-            transmission: 0.9,
-            opacity: 1,
+        const fallbackGeo = new THREE.BoxGeometry(width, height, depth);
+        const fallbackMat = new THREE.MeshStandardMaterial({
+            color: 0x1E293B,
+            metalness: 0.8,
+            roughness: 0.3,
+            wireframe: false,
             transparent: true,
-            roughness: 0,
-            ior: 1.5
+            opacity: 0.8
         });
-        const glass = new THREE.Mesh(glassGeo, glassMat);
-        lensGroup.add(lensHousing);
-        lensGroup.add(glass);
-
-        lensGroup.position.set(0, height / 2 + 0.15, 0);
-        this.cubeSatGroup.add(lensGroup);
-
-        // Antennas (Deployable Tape Measure Elements at Bottom -Y)
-        const antennaMat = new THREE.MeshBasicMaterial({ color: 0xFFB703 });
-        const ant1Geo = new THREE.CylinderGeometry(0.02, 0.02, 1.5);
-        
-        const ant1 = new THREE.Mesh(ant1Geo, antennaMat);
-        ant1.position.set(width / 2, -height / 2 - 0.75, depth / 2);
-        this.cubeSatGroup.add(ant1);
-
-        const ant2 = new THREE.Mesh(ant1Geo, antennaMat);
-        ant2.position.set(-width / 2, -height / 2 - 0.75, -depth / 2);
-        this.cubeSatGroup.add(ant2);
+        this.placeholderMesh = new THREE.Mesh(fallbackGeo, fallbackMat);
+        this.cubeSatGroup.add(this.placeholderMesh);
 
         // Coordinate Axes Indicator (X: Red, Y: Green, Z: Blue)
-        const axesHelper = new THREE.AxesHelper(2.5);
+        const axesHelper = new THREE.AxesHelper(2.2);
         this.cubeSatGroup.add(axesHelper);
 
-        // Outer Wireframe Bounding Box for High-Tech HUD feel
+        // Outer Wireframe Bounding Box
         const wireframeGeo = new THREE.BoxGeometry(width * 1.08, height * 1.04, depth * 1.08);
-        const wireframeMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff, wireframe: true, transparent: true, opacity: 0.25 });
+        const wireframeMat = new THREE.MeshBasicMaterial({ color: 0x0284c7, wireframe: true, transparent: true, opacity: 0.35 });
         const wireframe = new THREE.Mesh(wireframeGeo, wireframeMat);
         this.cubeSatGroup.add(wireframe);
+    }
 
-        this.scene.add(this.cubeSatGroup);
+    async loadSpaceDayCadModel() {
+        try {
+            console.log('Loading Space Day STEP CAD Model...');
+            const response = await fetch('models/space_day.json');
+            if (!response.ok) {
+                throw new Error(`HTTP error ${response.status}`);
+            }
+            const meshesData = await response.json();
+
+            this.cadModelGroup = new THREE.Group();
+
+            meshesData.forEach((meshData) => {
+                const geometry = new THREE.BufferGeometry();
+                
+                geometry.setAttribute(
+                    'position',
+                    new THREE.Float32BufferAttribute(meshData.positions, 3)
+                );
+
+                if (meshData.normals && meshData.normals.length > 0) {
+                    geometry.setAttribute(
+                        'normal',
+                        new THREE.Float32BufferAttribute(meshData.normals, 3)
+                    );
+                } else {
+                    geometry.computeVertexNormals();
+                }
+
+                if (meshData.indices && meshData.indices.length > 0) {
+                    geometry.setIndex(meshData.indices);
+                }
+
+                // Compute Bounding Box & Center
+                geometry.computeBoundingBox();
+                geometry.center();
+
+                const bbox = geometry.boundingBox;
+                const sizeY = bbox.max.y - bbox.min.y;
+                const targetScale = 3.0 / (sizeY || 1.0); // Scale model to 3.0 units high
+
+                // Create High-Precision Aerospace Metallic Material
+                const material = new THREE.MeshStandardMaterial({
+                    color: 0x1E3A8A, // Royal Deep Blue
+                    metalness: 0.85,
+                    roughness: 0.25,
+                    envMapIntensity: 1.2
+                });
+
+                const cadMesh = new THREE.Mesh(geometry, material);
+                cadMesh.scale.set(targetScale, targetScale, targetScale);
+                
+                // Add metallic wireframe overlay edge lines for crisp STEP CAD presentation
+                const wireGeo = new THREE.WireframeGeometry(geometry);
+                const wireMat = new THREE.LineBasicMaterial({ color: 0x38BDF8, transparent: true, opacity: 0.15 });
+                const wireLine = new THREE.LineSegments(wireGeo, wireMat);
+                wireLine.scale.set(targetScale, targetScale, targetScale);
+
+                this.cadModelGroup.add(cadMesh);
+                this.cadModelGroup.add(wireLine);
+            });
+
+            // Remove temporary placeholder once CAD STEP model is loaded
+            if (this.placeholderMesh) {
+                this.cubeSatGroup.remove(this.placeholderMesh);
+                this.placeholderMesh.geometry.dispose();
+                this.placeholderMesh.material.dispose();
+            }
+
+            this.cubeSatGroup.add(this.cadModelGroup);
+            console.log('Space Day STEP CAD Model successfully added to 3D orientation scene!');
+
+        } catch (err) {
+            console.warn('Could not load space_day.json, keeping 6U CubeSat fallback geometry:', err);
+        }
     }
 
     updateOrientation(pitchDeg, rollDeg, yawDeg, internalTempC) {
@@ -187,13 +200,13 @@ class CubeSat3D {
         // Dynamic Internal Temp Glow Color
         if (this.coreLight) {
             if (internalTempC > 35) {
-                this.coreLight.color.setHex(0xFF3366); // Red warning glow
+                this.coreLight.color.setHex(0xDC2626); // Red warning glow
                 this.coreLight.intensity = 3.5;
             } else if (internalTempC > 26) {
-                this.coreLight.color.setHex(0xFFB703); // Amber warm glow
+                this.coreLight.color.setHex(0xD97706); // Amber warm glow
                 this.coreLight.intensity = 2.5;
             } else {
-                this.coreLight.color.setHex(0x00F0FF); // Nominal cyan glow
+                this.coreLight.color.setHex(0x0284C7); // Nominal sky blue glow
                 this.coreLight.intensity = 1.8;
             }
         }
@@ -216,7 +229,7 @@ class CubeSat3D {
         this.currentYaw += (this.targetYaw - this.currentYaw) * 0.1;
 
         if (this.cubeSatGroup) {
-            // Three.js Euler order XYZ
+            // Three.js Euler order YXZ for standard flight attitude (Yaw, Pitch, Roll)
             this.cubeSatGroup.rotation.set(
                 this.currentPitch,
                 this.currentYaw,

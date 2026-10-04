@@ -28,7 +28,7 @@ The system features standard **CCSDS Space Packet (CCSDS 133.0-B-2)** decoding, 
 1. **BMP280 Sensor**: Barometric Pressure ($hPa$), External Temperature ($^\circ C$), Calculated Altitude ($m$).
 2. **DHT11 Avionics**: Internal Cabin Temperature ($^\circ C$), Relative Humidity ($\%$).
 3. **HW-072 LDR & EPS Subsystem**: Solar Panel Power Output ($kW$), Lux, Raw ADC ($0-1023$), Battery Voltage ($V$), Battery Percentage ($\%$), Daylight vs. Eclipse Status.
-4. **MPU-9250 9-DOF IMU & ADCS**: Real-Time Pitch ($^\circ$), Roll ($^\circ$), Yaw ($^\circ$), Gyroscope XYZ ($\frac{^\circ}{s}$), Accelerometer XYZ ($g$), and dynamic kinematic orientation calculation.
+4. **MPU-9250 9-DOF IMU & Space Day CAD Model**: Real-Time Pitch ($^\circ$), Roll ($^\circ$), Yaw ($^\circ$), Gyroscope XYZ ($\frac{^\circ}{s}$), Accelerometer XYZ ($g$), rendering the custom **`Space Day.step`** CAD model geometry live on screen.
 5. **Ublox NEO-6M GPS**: 3D Fix Tracking, Latitude, Longitude, Velocity ($km/s$), Satellites in view.
 6. **OV7670 Payload Camera**: Live chunk reassembler decoding hexadecimal RGB565 / JPEG payload frames onto an HTML5 canvas.
 
