@@ -1,0 +1,27 @@
+{
+  "name": "cubesat-groundstation-dashboard",
+  "version": "1.0.0",
+  "description": "Professional 6U CubeSat Telemetry & SDR Ground Station Dashboard",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "serialport": "^13.0.0",
+    "ws": "^8.17.0"
+  },
+  "keywords": [
+    "cubesat",
+    "sdr",
+    "groundstation",
+    "telemetry",
+    "dashboard",
+    "3d",
+    "threejs"
+  ],
+  "author": "Antigravity Aerospace",
+  "license": "MIT"
+}

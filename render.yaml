@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: cubesat-groundstation-dashboard
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: SDR_TCP_PORT
+        value: 12345
+      - key: SDR_UDP_PORT
+        value: 7373
