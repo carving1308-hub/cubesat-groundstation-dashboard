@@ -500,26 +500,57 @@ body {
 
 .cubesat-hud {
     position: absolute;
-    top: 8px;
-    left: 8px;
+    top: 6px;
+    left: 6px;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 3px;
     pointer-events: none;
+}
+
+.cubesat-hud-stats {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.88);
+    border: 1px solid var(--border-color);
+    border-left: 3px solid var(--accent-cyan);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: var(--font-mono);
+    font-size: 0.60rem;
+    pointer-events: none;
+    z-index: 10;
+    backdrop-filter: blur(4px);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.hud-item {
+    color: var(--text-muted);
+    font-size: 0.60rem;
+    font-weight: 600;
+}
+
+.hud-item span {
+    color: var(--accent-cyan);
+    font-weight: 700;
 }
 
 .hud-pill {
     background: rgba(255, 255, 255, 0.92);
     border: 1px solid #CBD5E1;
     border-left: 3px solid var(--accent-cyan);
-    padding: 3px 8px;
+    padding: 2px 6px;
     border-radius: 3px;
     font-family: var(--font-mono);
-    font-size: 0.7rem;
+    font-size: 0.60rem;
     display: flex;
     justify-content: space-between;
-    gap: 12px;
-    min-width: 110px;
+    gap: 8px;
+    min-width: 90px;
     color: #0F172A;
 }
 
@@ -530,10 +561,10 @@ body {
 
 .cubesat-controls {
     position: absolute;
-    bottom: 8px;
-    right: 8px;
+    bottom: 6px;
+    right: 6px;
     display: flex;
-    gap: 6px;
+    gap: 4px;
 }
 
 .btn-mini {
@@ -541,8 +572,8 @@ body {
     border: 1px solid #CBD5E1;
     color: var(--text-primary);
     font-family: var(--font-mono);
-    font-size: 0.65rem;
-    padding: 3px 6px;
+    font-size: 0.60rem;
+    padding: 2px 5px;
     border-radius: 3px;
     cursor: pointer;
 }
@@ -562,24 +593,34 @@ body {
     background: #F8FAFC;
 }
 
+.map-hud-overlay,
 .map-telemetry-overlay {
     position: absolute;
-    bottom: 8px;
-    left: 8px;
-    background: rgba(255, 255, 255, 0.92);
+    bottom: 6px;
+    left: 6px;
+    background: rgba(255, 255, 255, 0.88);
     border: 1px solid var(--border-color);
-    border-radius: 4px;
-    padding: 6px 10px;
+    border-radius: 3px;
+    padding: 2px 6px;
     font-family: var(--font-mono);
-    font-size: 0.68rem;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 4px 12px;
+    font-size: 0.60rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
     z-index: 1000;
     pointer-events: none;
     color: #0F172A;
+    backdrop-filter: blur(4px);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
+.map-stat-row,
+.map-overlay-item {
+    font-size: 0.60rem;
+    color: var(--text-muted);
+}
+
+.map-stat-row span,
 .map-overlay-item span {
     color: var(--accent-cyan);
     font-weight: 700;
