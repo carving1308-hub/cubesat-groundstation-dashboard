@@ -14,7 +14,10 @@ const SDR_UDP_PORT = process.env.SDR_UDP_PORT || 7373;
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), {
+    maxAge: '1h',
+    etag: true
+}));
 
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
@@ -34,9 +37,27 @@ const GROUND_STATION = {
 let telemetryState = {
     timestamp: Date.now(),
     met_seconds: 0,
-    source: 'LORA_LIVE', // Default to live LoRa module mode
+    source: 'SIMULATOR', // Default to SIMULATOR so dashboard starts fully active & operational
     sdr_connected: false,
-    last_sdr_packet_time: null,
+    last_sdr_packet_time: Date.now(),
+
+    // Flight Dynamics & Launch Profile State
+    flight: {
+        phase: 'ASCENT', // 'LAUNCHING', 'ASCENT', 'PARACHUTE_DEPLOY', 'DESCENT', 'TOUCHDOWN'
+        phase_label: 'ASCENT (> 1000m)',
+        phase_index: 1, // 0: Launch, 1: Ascent, 2: Chute, 3: Descent, 4: Landed
+        altitude_m: 1045.0,
+        altitude_target_m: 30000.0,
+        max_altitude_m: 30000.0,
+        vertical_speed_ms: 54.2,
+        ascent_speed_ms: 54.2,
+        max_ascent_speed_ms: 82.5,
+        descent_speed_ms: 0.0,
+        vertical_accel_g: 2.8,
+        parachute_status: 'ARMED @ 1000m+',
+        parachute_deployed: false,
+        flight_time_s: 18.0
+    },
 
     // Real-Time 440 MHz LoRa Module State
     lora: {
@@ -243,15 +264,363 @@ function generateOv7670HexPayload(frameId) {
     return hex;
 }
 
-// ORBIT & PHYSICS TELEMETRY SIMULATOR
-let simAngle = 0;
-let orbitTime = 0;
+// Initialize camera with pre-rendered Earth horizon space frame
+telemetryState.camera = {
+    last_captured: Date.now(),
+    frame_id: 1,
+    sensor: "OV7670",
+    format: "RGB565 HEX",
+    resolution: "320x240",
+    exposure_ms: 32.5,
+    total_bytes: 38400,
+    received_bytes: 38400,
+    status: "HEX DECODED",
+    hex_data: generateOv7670HexPayload(1)
+};
 
-function updateSimulator() {
+// Seed initial telemetry history for instant, beautiful charts on load
+const seedStartTime = Date.now();
+for (let i = 24; i >= 1; i--) {
+    const t = seedStartTime - (i * 1500);
+    const timeStr = new Date(t).toISOString().substr(11, 8);
+    const histFlightTime = Math.max(0, 18.0 - (i * 0.7)); // Leading up to t=18s (ascent past 1000m)
+    let histAlt = 0;
+    let histVert = 0;
+    if (histFlightTime < 6.0) {
+        histAlt = 140.0 * Math.pow(histFlightTime / 6.0, 2);
+        histVert = 38.0 * (histFlightTime / 6.0);
+    } else {
+        const p = (histFlightTime - 6.0) / 10.0;
+        histAlt = 140.0 + (1020.0 - 140.0) * Math.sin(Math.min(1.0, p) * Math.PI / 2);
+        histVert = 38.0 + 44.5 * Math.sin(Math.min(1.0, p) * Math.PI);
+    }
+    const histPress = parseFloat((1013.25 * Math.pow(1 - (2.25577e-5 * histAlt), 5.25588)).toFixed(1));
+    const histTemp = parseFloat((24.0 - (histAlt * 0.0065)).toFixed(1));
+
+    telemetryHistory.push({
+        time: timeStr,
+        temp_ext: histTemp,
+        press: histPress,
+        hum: parseFloat((48.0 + 4.0 * Math.sin(i * 0.2)).toFixed(1)),
+        temp_int: 23.8,
+        battery: 94.5,
+        solar_kw: parseFloat((0.45 + 0.15 * Math.sin(i * 0.3)).toFixed(3)),
+        ldr_raw: Math.round(((0.45 + 0.15 * Math.sin(i * 0.3)) / 1.0) * 1023),
+        ldr_lux: Math.round((0.45 + 0.15 * Math.sin(i * 0.3)) * 1250),
+        pitch: parseFloat((15.0 * Math.sin(i * 0.4)).toFixed(1)),
+        roll: parseFloat((-6.0 * Math.cos(i * 0.4)).toFixed(1)),
+        yaw: parseFloat(((i * 14.0) % 360).toFixed(1)),
+        rssi: -68.0,
+        snr: 11.5,
+        doppler: 125.0,
+        alt_m: parseFloat(histAlt.toFixed(1)),
+        ascent_spd: parseFloat(histVert.toFixed(1)),
+        descent_spd: 0.0,
+        vert_spd: parseFloat(histVert.toFixed(1)),
+        phase: 'ASCENT'
+    });
+}
+
+// LAUNCH MISSION FLIGHT SIMULATOR ENGINE
+let simAngle = 0;
+let flightTime = 18.0; // Initial start in powered ascent (>1000m increasing)
+const FLIGHT_CYCLE_DURATION = 80.0; // 80s full launch mission profile
+let maxAscentSpeedRecorded = 82.5;
+let simStepCount = 0;
+
+function updateSimulator(dtSec = 0.15) {
     const metSec = Math.floor((Date.now() - missionStartTime) / 1000);
     telemetryState.met_seconds = metSec;
     telemetryState.timestamp = Date.now();
-    // Real sensor telemetry graphs & values are updated ONLY when receiving actual LoRa telemetry packets.
+
+    if (telemetryState.source === 'SIMULATOR') {
+        simAngle += 0.25 * dtSec;
+        flightTime += dtSec;
+        if (flightTime >= FLIGHT_CYCLE_DURATION) {
+            flightTime = 0.0; // Loop back to Launch Pad T-0
+        }
+
+        let phase = 'LAUNCHING';
+        let phase_label = 'LAUNCH / LIFTOFF';
+        let phase_index = 0;
+        let alt_m = 0;
+        let vert_spd = 0;
+        let ascent_spd = 0;
+        let descent_spd = 0;
+        let chute_status = 'LOCKED';
+        let chute_deployed = false;
+        let g_force = 1.0;
+
+        // 1. PHASE 1: LAUNCH & LIFTOFF (0 <= t < 6)
+        if (flightTime < 6.0) {
+            phase = 'LAUNCHING';
+            phase_label = 'LAUNCH / LIFTOFF';
+            phase_index = 0;
+            const progress = flightTime / 6.0;
+            alt_m = 140.0 * Math.pow(progress, 2);
+            vert_spd = 38.0 * progress;
+            ascent_spd = vert_spd;
+            descent_spd = 0.0;
+            chute_status = 'LOCKED';
+            chute_deployed = false;
+            g_force = 1.0 + 2.5 * progress;
+        }
+        // 2. PHASE 2: POWERED ASCENT (6 <= t < 24)
+        // Passes through 1,000m around t=16s and keeps climbing to 30,000m!
+        else if (flightTime < 24.0) {
+            phase = 'ASCENT';
+            phase_index = 1;
+            const tAscent = flightTime - 6.0; // 0 to 18s
+            if (tAscent < 10.0) {
+                // Accelerating through 1,000m!
+                const p = tAscent / 10.0;
+                alt_m = 140.0 + (1020.0 - 140.0) * Math.sin(p * Math.PI / 2);
+                vert_spd = 38.0 + 44.5 * Math.sin(p * Math.PI); // peaks at 82.5 m/s
+                g_force = 2.8 + 0.8 * Math.sin(p * Math.PI);
+            } else {
+                // Coast from 1,020m to 30,000m Apogee (tAscent from 10 to 18)
+                const p2 = (tAscent - 10.0) / 8.0;
+                alt_m = 1020.0 + (30000.0 - 1020.0) * Math.sin(p2 * Math.PI / 2);
+                vert_spd = Math.max(0.0, 52.0 * Math.cos(p2 * Math.PI / 2));
+                g_force = Math.max(0.2, 1.8 * Math.cos(p2 * Math.PI / 2));
+            }
+            ascent_spd = vert_spd;
+            descent_spd = 0.0;
+            if (alt_m >= 1000.0) {
+                phase_label = 'ASCENT (> 1000m)';
+                chute_status = 'ARMED @ 1000m+';
+            } else {
+                phase_label = 'POWERED ASCENT';
+                chute_status = 'ARMED';
+            }
+            chute_deployed = false;
+        }
+        // 3. PHASE 3: APOGEE & PARACHUTE DEPLOYMENT (24 <= t < 28)
+        else if (flightTime < 28.0) {
+            phase = 'PARACHUTE_DEPLOY';
+            phase_label = 'PARACHUTE DEPLOYED';
+            phase_index = 2;
+            const tChute = flightTime - 24.0; // 0 to 4s
+            alt_m = 30000.0 - (12.0 * tChute);
+            vert_spd = - (2.0 + 1.45 * tChute); // Decelerating under canopy
+            ascent_spd = 0.0;
+            descent_spd = Math.abs(vert_spd);
+            chute_status = 'DEPLOYED';
+            chute_deployed = true;
+            g_force = -0.8 + 1.8 * (tChute / 4.0);
+        }
+        // 4. PHASE 4: CONTROLLED DESCENT (28 <= t < 65)
+        else if (flightTime < 65.0) {
+            phase = 'DESCENT';
+            phase_label = 'CONTROLLED DESCENT';
+            phase_index = 3;
+            const tDesc = flightTime - 28.0; // 0 to 37s
+            const totalDescTime = 37.0;
+            const descProgress = tDesc / totalDescTime;
+            alt_m = Math.max(0.0, 29952.0 * (1.0 - descProgress));
+            vert_spd = -7.8 + 0.3 * Math.sin(tDesc * 1.5);
+            ascent_spd = 0.0;
+            descent_spd = Math.abs(vert_spd);
+            chute_status = 'IN FLIGHT (CANOPY ACTIVE)';
+            chute_deployed = true;
+            g_force = 1.0 + 0.05 * Math.sin(tDesc * 2.0);
+        }
+        // 5. PHASE 5: TOUCHDOWN & RECOVERY (65 <= t < 80)
+        else {
+            phase = 'TOUCHDOWN';
+            phase_label = 'TOUCHDOWN / RECOVERY ACTIVE';
+            phase_index = 4;
+            alt_m = 0.0;
+            vert_spd = 0.0;
+            ascent_spd = 0.0;
+            descent_spd = 0.0;
+            chute_status = 'LANDED';
+            chute_deployed = true;
+            g_force = 1.0;
+        }
+
+        alt_m = parseFloat(alt_m.toFixed(1));
+        vert_spd = parseFloat(vert_spd.toFixed(1));
+        ascent_spd = parseFloat(ascent_spd.toFixed(1));
+        descent_spd = parseFloat(descent_spd.toFixed(1));
+        g_force = parseFloat(g_force.toFixed(2));
+
+        telemetryState.flight = {
+            phase,
+            phase_label,
+            phase_index,
+            altitude_m: alt_m,
+            altitude_target_m: 30000.0,
+            max_altitude_m: 30000.0,
+            vertical_speed_ms: vert_spd,
+            ascent_speed_ms: ascent_spd,
+            max_ascent_speed_ms: maxAscentSpeedRecorded,
+            descent_speed_ms: descent_spd,
+            parachute_status: chute_status,
+            parachute_deployed: chute_deployed,
+            vertical_accel_g: g_force,
+            flight_time_s: parseFloat(flightTime.toFixed(1))
+        };
+
+        // GPS Coordinates permanently locked on given ground station coordinates
+        const lat = 30.768776152974365;
+        const lon = 76.57395518470074;
+        const alt_km = parseFloat((alt_m / 1000.0).toFixed(3));
+        const velocity_kms = parseFloat((Math.sqrt(Math.pow(vert_spd, 2) + Math.pow(12.0, 2)) / 1000.0).toFixed(3));
+        const sats = Math.max(7, Math.min(12, Math.round(9 + 2 * Math.sin(simAngle * 0.1))));
+
+        telemetryState.gps = {
+            lat, lon, alt_km, velocity_kms,
+            sat_name: "CUBESAT",
+            norad_id: 59124,
+            footprint_km: 15,
+            orbit_number: 1,
+            satellites: sats
+        };
+
+        // IMU Dynamics:
+        // During ascent: rocket vibrations and orientation pointing up
+        // During descent: gentle pendulum oscillation under parachute
+        let pitch = 0;
+        let roll = 0;
+        let yaw = ((simAngle * 12.0 * (180 / Math.PI)) % 360);
+        if (phase === 'LAUNCHING' || phase === 'ASCENT') {
+            pitch = parseFloat((12.0 * Math.sin(simAngle * 1.2)).toFixed(1));
+            roll = parseFloat((-6.0 * Math.cos(simAngle * 1.1)).toFixed(1));
+        } else if (phase === 'DESCENT') {
+            pitch = parseFloat((5.0 * Math.sin(flightTime * 2.0)).toFixed(1));
+            roll = parseFloat((4.5 * Math.cos(flightTime * 2.0)).toFixed(1));
+        }
+
+        const gyro_x = parseFloat((0.4 * Math.cos(simAngle)).toFixed(1));
+        const gyro_y = parseFloat((-0.3 * Math.sin(simAngle)).toFixed(1));
+        const gyro_z = 0.15;
+
+        telemetryState.motion = {
+            pitch_deg: pitch,
+            roll_deg: roll,
+            yaw_deg: parseFloat(yaw.toFixed(1)),
+            gyro_x_dps: gyro_x,
+            gyro_y_dps: gyro_y,
+            gyro_z_dps: gyro_z,
+            accel_x_g: 0.05,
+            accel_y_g: 0.02,
+            accel_z_g: g_force,
+            mag_x: 0.12, mag_y: -0.22, mag_z: 0.45,
+            adcs_mode: chute_deployed ? "CANOPY_STABILIZED" : "ASCENT_GUIDANCE"
+        };
+
+        // Environmental Sensors (BMP280 Barometric Formula & Temperature Lapse Rate)
+        const baroPress = parseFloat((1013.25 * Math.pow(1 - (2.25577e-5 * alt_m), 5.25588)).toFixed(2));
+        const baroTemp = parseFloat((24.0 - (alt_m * 0.0065) + 0.3 * Math.sin(simAngle)).toFixed(1));
+        const hum = parseFloat((46.0 + 4.0 * Math.sin(simAngle * 0.1)).toFixed(1));
+        const temp_int = parseFloat((24.0 + 1.5 * Math.sin(simAngle * 0.05)).toFixed(1));
+        const cpu_temp = parseFloat((36.5 + 2.0 * Math.sin(simAngle * 0.05)).toFixed(1));
+        const board_voltage = parseFloat((3.30 + 0.01 * Math.sin(simAngle)).toFixed(2));
+
+        telemetryState.external = {
+            temp_c: baroTemp,
+            pressure_hpa: baroPress,
+            humidity_pct: hum
+        };
+
+        telemetryState.internal = {
+            temp_c: temp_int,
+            cpu_temp_c: cpu_temp,
+            board_voltage_v: board_voltage,
+            status: "NOMINAL"
+        };
+
+        // Power Subsystem
+        const solar_kw = parseFloat(Math.max(0.1, 0.65 + 0.25 * Math.sin(simAngle * 0.3)).toFixed(3));
+        const ldr_raw = Math.round((solar_kw / 1.0) * 1023);
+        const ldr_lux = Math.round(solar_kw * 1250);
+        const battery = parseFloat((92.0 - (flightTime / FLIGHT_CYCLE_DURATION) * 2.0).toFixed(1));
+        const batt_volt = parseFloat((7.4 + (battery / 100.0) * 0.9).toFixed(2));
+
+        telemetryState.power = {
+            battery_pct: battery,
+            battery_voltage_v: batt_volt,
+            battery_current_a: 0.35,
+            battery_temp_c: 22.0,
+            solar_panel_kw: solar_kw,
+            solar_current_a: parseFloat((solar_kw * 120).toFixed(2)),
+            ldr_raw,
+            ldr_lux,
+            eclipse_status: "DAYLIGHT"
+        };
+
+        // 440 MHz RF Signal Medium (LoRa)
+        const rssi = parseFloat((-68.0 - (alt_m / 30000.0) * 8.0 + 2.0 * Math.sin(simAngle)).toFixed(1));
+        const snr = parseFloat((11.5 - (alt_m / 30000.0) * 2.0 + 1.0 * Math.cos(simAngle)).toFixed(1));
+        const doppler_hz = parseFloat((vert_spd * 1.47).toFixed(1)); // Doppler proportional to vertical speed!
+
+        telemetryState.rf.rssi_dbm = rssi;
+        telemetryState.rf.snr_db = snr;
+        telemetryState.rf.doppler_hz = doppler_hz;
+        telemetryState.rf.link_quality_pct = Math.max(0, Math.min(100, Math.round(((rssi + 130) / 80) * 60 + ((snr + 10) / 25) * 40)));
+        telemetryState.last_sdr_packet_time = Date.now();
+
+        // Synchronize sensors object
+        telemetryState.sensors = {
+            bmp280: { temp_c: baroTemp, pressure_hpa: baroPress, altitude_m: Math.round(alt_m), status: "NOMINAL" },
+            mpu9250: { pitch_deg: pitch, roll_deg: roll, yaw_deg: yaw, gyro_x, gyro_y, gyro_z, status: "NOMINAL" },
+            dht11: { temp_int_c: temp_int, humidity_pct: hum, status: "NOMINAL" },
+            neo6m: { lat, lon, alt_m: Math.round(alt_m), satellites: sats, status: "3D_FIX" },
+            hw072_ldr: { solar_kw, raw_adc: ldr_raw, lux: ldr_lux, status: "ACTIVE" },
+            last_hex_frame: generateHexTelemetryPayload(telemetryState),
+            last_decoded_time: Date.now()
+        };
+
+        pushHistory(telemetryState);
+
+        // Log a simulated packet every ~1 second (7 ticks @ 150ms)
+        simStepCount++;
+        if (simStepCount % 7 === 0) {
+            telemetryState.rf.packets_received++;
+            const ccsdsHex = generateHexTelemetryPayload(telemetryState);
+            const logEntry = {
+                direction: 'RX',
+                raw: `TM_${phase}: Alt=${alt_m}m, Vz=${vert_spd}m/s, Asc=${ascent_spd}m/s, Desc=${descent_spd}m/s, Press=${baroPress}hPa, Batt=${battery}%`,
+                raw_hex: ccsdsHex,
+                is_ccsds: true,
+                ccsds_header: {
+                    version: 0,
+                    packet_type: 0,
+                    sec_header_flag: 1,
+                    apid: 0x001,
+                    seq_flags: 3,
+                    seq_count: telemetryState.rf.packets_received,
+                    data_len: Math.round(ccsdsHex.length / 2) - 6,
+                    timestamp: Date.now()
+                },
+                parsed: true,
+                data: {
+                    temp_ext: baroTemp, press: baroPress, hum, temp_int,
+                    battery, solar_kw,
+                    pitch, roll, yaw,
+                    lat, lon, alt: alt_km,
+                    satellites: sats,
+                    rssi, snr,
+                    flight_phase: phase,
+                    altitude_m: alt_m,
+                    ascent_speed: ascent_spd,
+                    descent_speed: descent_spd
+                },
+                rssi,
+                snr,
+                timestamp: Date.now(),
+                freq_mhz: 440.0,
+                source: 'SIMULATOR'
+            };
+            logLoraPacket(logEntry);
+            broadcastWs({
+                type: 'LORA_PACKET',
+                packet: logEntry,
+                data: telemetryState
+            });
+        }
+    }
 }
 
 function pushHistory(state) {
@@ -264,12 +633,19 @@ function pushHistory(state) {
         temp_int: state.internal.temp_c,
         battery: state.power.battery_pct,
         solar_kw: state.power.solar_panel_kw,
+        ldr_raw: (state.sensors?.hw072_ldr?.raw_adc !== undefined) ? state.sensors.hw072_ldr.raw_adc : (state.power?.ldr_raw || 0),
+        ldr_lux: (state.sensors?.hw072_ldr?.lux !== undefined) ? state.sensors.hw072_ldr.lux : (state.power?.ldr_lux || 0),
         pitch: state.motion.pitch_deg,
         roll: state.motion.roll_deg,
         yaw: state.motion.yaw_deg,
         rssi: state.rf.rssi_dbm,
         snr: state.rf.snr_db,
-        doppler: state.rf.doppler_hz
+        doppler: state.rf.doppler_hz,
+        alt_m: state.flight ? state.flight.altitude_m : Math.round(state.gps.alt_km * 1000),
+        ascent_spd: state.flight ? state.flight.ascent_speed_ms : 0,
+        descent_spd: state.flight ? state.flight.descent_speed_ms : 0,
+        vert_spd: state.flight ? state.flight.vertical_speed_ms : 0,
+        phase: state.flight ? state.flight.phase : 'ASCENT'
     };
 
     telemetryHistory.push(entry);
@@ -278,19 +654,39 @@ function pushHistory(state) {
     }
 }
 
-// Tick loop at 4 Hz (250 ms)
-setInterval(() => {
-    updateSimulator();
-    broadcastTelemetry();
-}, 250);
+// High-speed telemetry broadcast loop (~33.3 Hz / 30 ms)
+const TICK_MS = 30;
+let broadcastCounter = 0;
 
-// Broadcast via WebSockets
+setInterval(() => {
+    updateSimulator(TICK_MS / 1000);
+    broadcastTelemetry();
+}, TICK_MS);
+
+// Broadcast via WebSockets (lightweight payload every tick, history periodically)
 function broadcastTelemetry() {
+    if (wss.clients.size === 0) return;
+    broadcastCounter++;
+    const latestPoint = telemetryHistory[telemetryHistory.length - 1];
+    // Send full history periodically to prevent client Chart.js choking
+    const includeHistory = (broadcastCounter % 25 === 0);
+
+    // Omit heavy 76KB camera hex payload from high-frequency (60ms) telemetry tick
+    let camHex = telemetryState.camera ? telemetryState.camera.hex_data : undefined;
+    if (telemetryState.camera) {
+        telemetryState.camera.hex_data = undefined;
+    }
+
     const payload = JSON.stringify({
         type: 'TELEMETRY_UPDATE',
         data: telemetryState,
-        history: telemetryHistory
+        point: latestPoint,
+        history: includeHistory ? telemetryHistory : undefined
     });
+
+    if (telemetryState.camera) {
+        telemetryState.camera.hex_data = camHex;
+    }
 
     wss.clients.forEach((client) => {
         if (client.readyState === WebSocket.OPEN) {
@@ -300,6 +696,7 @@ function broadcastTelemetry() {
 }
 
 function broadcastWs(messageObj) {
+    if (wss.clients.size === 0) return;
     const payload = JSON.stringify(messageObj);
     wss.clients.forEach((client) => {
         if (client.readyState === WebSocket.OPEN) {
@@ -1406,8 +1803,25 @@ function resetTelemetryToZero() {
     telemetryState.sensors.neo6m = { lat: 30.768776152974365, lon: 76.57395518470074, alt_m: 0, speed_kms: 0.0, satellites: 0, status: "STANDBY" };
     telemetryState.sensors.hw072_ldr = { lux: 0, raw_adc: 0, solar_kw: 0.0, status: "STANDBY" };
     telemetryState.sensors.last_hex_frame = "";
+    flightTime = 0.0;
+    telemetryState.flight = {
+        phase: "LAUNCHING",
+        phase_label: "LAUNCH / LIFTOFF",
+        phase_index: 0,
+        altitude_m: 0.0,
+        altitude_target_m: 30000.0,
+        max_altitude_m: 30000.0,
+        vertical_speed_ms: 0.0,
+        ascent_speed_ms: 0.0,
+        max_ascent_speed_ms: maxAscentSpeedRecorded,
+        descent_speed_ms: 0.0,
+        vertical_accel_g: 1.0,
+        parachute_status: "LOCKED",
+        parachute_deployed: false,
+        flight_time_s: 0.0
+    };
     broadcastTelemetry();
-    console.log('[Dashboard] All parameters and RF frequency medium values reset to 0');
+    console.log('[Dashboard] All parameters, flight profile and RF values reset');
 }
 
 // -------------------------------------------------------------------
@@ -1440,6 +1854,7 @@ wss.on('connection', async (ws) => {
             if (parsed.command === 'SET_SOURCE') {
                 telemetryState.source = parsed.source;
                 console.log(`[Config] Telemetry Source set to: ${parsed.source}`);
+                broadcastTelemetry();
             } else if (parsed.command === 'TRIGGER_CAMERA') {
                 telemetryState.camera.last_captured = Date.now();
                 telemetryState.camera.frame_id += 1;
@@ -1448,12 +1863,37 @@ wss.on('connection', async (ws) => {
                 telemetryState.camera.total_bytes = 38400;
                 telemetryState.camera.hex_data = generateOv7670HexPayload(telemetryState.camera.frame_id);
                 console.log(`[OV7670 Camera] New frame #${telemetryState.camera.frame_id} generated from Hex data (38,400 bytes)`);
+                broadcastWs({
+                    type: 'CAMERA_FRAME_RECEIVED',
+                    camera: telemetryState.camera
+                });
             } else if (parsed.command === 'LORA_CONNECT') {
                 connectLoraSerial(parsed.port, parsed.baudRate || 115200);
             } else if (parsed.command === 'LORA_DISCONNECT') {
                 disconnectLoraSerial();
             } else if (parsed.command === 'RESET_TELEMETRY') {
                 resetTelemetryToZero();
+                broadcastTelemetry();
+            } else if (parsed.command === 'REPLAY_LAUNCH') {
+                flightTime = 0.0;
+                telemetryState.flight = {
+                    phase: "LAUNCHING",
+                    phase_label: "LAUNCH / LIFTOFF",
+                    phase_index: 0,
+                    altitude_m: 0.0,
+                    altitude_target_m: 30000.0,
+                    max_altitude_m: 30000.0,
+                    vertical_speed_ms: 0.0,
+                    ascent_speed_ms: 0.0,
+                    max_ascent_speed_ms: maxAscentSpeedRecorded,
+                    descent_speed_ms: 0.0,
+                    vertical_accel_g: 1.0,
+                    parachute_status: "LOCKED",
+                    parachute_deployed: false,
+                    flight_time_s: 0.0
+                };
+                broadcastTelemetry();
+                console.log('[Flight Profile] Instant Launch Replay triggered from Pad T-0 via WebSocket');
             } else if (parsed.command === 'LORA_SEND') {
                 sendLoraCommand(parsed.data);
             } else if (parsed.command === 'LORA_LIST_PORTS') {
@@ -1846,24 +2286,60 @@ app.post('/api/mode', (req, res) => {
     const { source } = req.body;
     if (['LORA_LIVE', 'SDR_LIVE', 'SIMULATOR'].includes(source)) {
         telemetryState.source = source;
+        broadcastTelemetry();
         return res.json({ success: true, source: telemetryState.source });
     }
     res.status(400).json({ error: "Invalid source. Use LORA_LIVE, SDR_LIVE or SIMULATOR" });
 });
 
+app.get('/api/camera/latest', (req, res) => {
+    res.json({ success: true, camera: telemetryState.camera });
+});
+
 app.post('/api/camera/trigger', (req, res) => {
     telemetryState.camera.last_captured = Date.now();
     telemetryState.camera.frame_id += 1;
-    telemetryState.camera.status = 'FRAME_COMPLETE';
+    telemetryState.camera.status = 'HEX DECODED';
     telemetryState.camera.received_bytes = 38400;
     telemetryState.camera.total_bytes = 38400;
     telemetryState.camera.hex_data = generateOv7670HexPayload(telemetryState.camera.frame_id);
+
+    // Broadcast frame to all active WebSocket clients
+    broadcastWs({
+        type: 'CAMERA_FRAME_RECEIVED',
+        camera: telemetryState.camera
+    });
+
     res.json({ success: true, camera: telemetryState.camera });
 });
 
 app.post('/api/telemetry/reset', (req, res) => {
     resetTelemetryToZero();
+    broadcastTelemetry();
     res.json({ success: true, message: "Telemetry and RF frequency medium values reset to 0", telemetry: telemetryState });
+});
+
+app.post(['/api/flight/reset', '/api/flight/replay'], (req, res) => {
+    flightTime = 0.0;
+    telemetryState.flight = {
+        phase: "LAUNCHING",
+        phase_label: "LAUNCH / LIFTOFF",
+        phase_index: 0,
+        altitude_m: 0.0,
+        altitude_target_m: 30000.0,
+        max_altitude_m: 30000.0,
+        vertical_speed_ms: 0.0,
+        ascent_speed_ms: 0.0,
+        max_ascent_speed_ms: maxAscentSpeedRecorded,
+        descent_speed_ms: 0.0,
+        vertical_accel_g: 1.0,
+        parachute_status: "LOCKED",
+        parachute_deployed: false,
+        flight_time_s: 0.0
+    };
+    broadcastTelemetry();
+    console.log('[Flight Profile] Replaying launch from T-0 (Pad)');
+    res.json({ success: true, message: "Launch sequence replaying from T-0", flight: telemetryState.flight });
 });
 
 app.get('/api/telemetry/export', (req, res) => {

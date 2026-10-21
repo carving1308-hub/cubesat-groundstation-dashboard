@@ -4,13 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ORBITAL-6U CUBESAT TELEMETRY & 440 MHz LoRa GROUND STATION</title>
+    <title>6U CUBESAT FLIGHT PROFILE & 440 MHz LoRa GROUND STATION</title>
 
-    <!-- Google Fonts -->
+    <!-- Google Fonts: Geometric Sans-Serif (Outfit & Space Grotesk) + JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700;800&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
 
     <!-- Leaflet Maps CSS -->
@@ -31,8 +31,8 @@
     <header class="app-header">
         <div class="brand-section">
             <span class="sat-badge">6U CUBESAT</span>
-            <h1 class="brand-title"><span>GROUND STATION</span></h1>
-            <span class="freq-header-pill"><i class="fa-solid fa-tower-broadcast"></i> 440.000 MHz</span>
+            <h1 class="brand-title"><span>MISSION CONTROL</span></h1>
+
         </div>
 
         <!-- Timer Header Group: HH:MM:SS Format -->
@@ -49,341 +49,269 @@
 
         <div class="header-controls">
             <div class="status-pill" id="source-badge">
-                LORA_LIVE
+                SIMULATOR
             </div>
             <div class="status-pill">
                 <span class="status-dot" id="status-dot"></span>
-                <span id="status-text">WAITING FOR LORA</span>
+                <span id="status-text">DATA RECEIVING</span>
             </div>
+            <button class="btn-replay-header" id="btn-replay-header" title="Replay full launch mission cycle from T-0 (Pad)">
+                <i class="fa-solid fa-rotate-right"></i> REPLAY LAUNCH
+            </button>
             <button class="btn-reset-dash" id="btn-reset-dash" title="Reset all sensor values to 0, set Baud Rate to 9600, and reset COM Port">
-                <i class="fa-solid fa-rotate-left"></i> RESET DASHBOARD
+                <i class="fa-solid fa-rotate-left"></i> RESET
             </button>
             <button class="btn-toggle-source" id="btn-toggle-source" title="Toggle between LoRa/SDR Live Mode and Simulator">
-                <i class="fa-solid fa-satellite-dish"></i> TOGGLE SIM / LIVE
+                <i class="fa-solid fa-satellite-dish"></i> SIM / LIVE
             </button>
+            <div class="lora-quick-connect">
+                <select id="lora-port-select" class="lora-select-mini">
+                    <option value="COM7" selected>COM7</option>
+                    <option value="">Select Port...</option>
+                </select>
+                <button id="btn-lora-connect" class="btn-lora-mini connect">
+                    <i class="fa-solid fa-plug"></i>
+                    <span id="btn-lora-connect-label">CONNECT</span>
+                    <span class="lora-pulse-dot" id="lora-pulse-dot"></span>
+                </button>
+                <button id="btn-inject-test-pkt" class="btn-lora-mini secondary" title="Inject Test Packet">
+                    <i class="fa-solid fa-bolt"></i>
+                </button>
+                <button id="btn-open-terminal" class="btn-lora-mini secondary" title="Open LoRa Packet Monitor">
+                    <i class="fa-solid fa-terminal"></i>
+                </button>
+            </div>
         </div>
     </header>
 
     <!-- -------------------------------------------------------------------
-     * REAL-TIME 440 MHz LoRa MODULE CONTROL BAR
-     * Dedicated hardware connection bar for USB/Serial LoRa transceivers
+     * SCREEN SELECTOR NAVIGATION BAR (MULTI-SCREEN AEROSPACE CONSOLE)
+     * Quick switcher for Screen 1 and Screen 2 with keyboard hotkeys [1], [2]
      * ------------------------------------------------------------------- -->
-    <section class="lora-toolbar">
-        <div class="lora-bar-left">
-            <div class="lora-freq-pill">
-                <i class="fa-solid fa-radio"></i>
-                <span>FREQ: <strong>440.000 MHz</strong></span>
-                <span class="lora-mode-sub">UHF ISM</span>
-            </div>
-            <div class="lora-param-pill">
-                <span>SF7 | BW 125kHz | CR 4/5</span>
-            </div>
-        </div>
-
-        <div class="lora-bar-center">
-            <div class="lora-port-field">
-                <i class="fa-solid fa-microchip port-icon"></i>
-                <label for="lora-port-select">PORT:</label>
-                <select id="lora-port-select" class="lora-select">
-                    <option value="COM7" selected>COM7 - Target LoRa Receiver</option>
-                    <option value="">Select COM Port...</option>
-                </select>
-                <button id="btn-refresh-ports" class="btn-tool-icon" title="Refresh Serial COM Ports">
-                    <i class="fa-solid fa-arrows-rotate"></i>
-                </button>
-            </div>
-
-            <div class="lora-baud-field">
-                <label for="lora-baud-select">BAUD:</label>
-                <select id="lora-baud-select" class="lora-select baud-select">
-                    <option value="9600" selected>9600</option>
-                    <option value="115200">115200</option>
-                    <option value="57600">57600</option>
-                    <option value="38400">38400</option>
-                    <option value="19200">19200</option>
-                </select>
-            </div>
-
-            <button id="btn-lora-connect" class="btn-lora-action connect">
-                <i class="fa-solid fa-plug"></i> <span id="btn-lora-connect-label">CONNECT LORA</span>
-            </button>
-
-            <div class="lora-link-indicator" id="lora-link-indicator">
-                <span class="lora-pulse-dot" id="lora-pulse-dot"></span>
-                <span id="lora-link-text">OFFLINE</span>
-            </div>
-        </div>
-
-        <div class="lora-bar-right">
-            <button id="btn-inject-test-pkt" class="btn-sub-tool" title="Inject Test 440 MHz LoRa Packet to verify dashboard">
-                <i class="fa-solid fa-bolt"></i> TEST PACKET
-            </button>
-            <button id="btn-open-terminal" class="btn-sub-tool primary" title="Open Real-Time 440 MHz LoRa Terminal & AT Console">
-                <i class="fa-solid fa-terminal"></i> PACKET MONITOR
-            </button>
-        </div>
-    </section>
-
-    <!-- -------------------------------------------------------------------
-     * MAIN DASHBOARD GRID (EQUALLY DISTRIBUTED)
-     * ------------------------------------------------------------------- -->
-    <main class="dashboard-grid">
-
-        <!-- TOP ROW: Camera (Left), 3D Orientation (Center), GPS Map (Right) -->
-        <section class="top-row-grid">
-
-            <!-- PANEL 1: OV7670 CAMERA SCREEN -->
-            <div class="panel-card">
-                <div class="panel-header">
-                    <div class="panel-title">
-                        <i class="fa-solid fa-camera"></i>OV7670 CAMERA
-                    </div>
-                    <span class="panel-tag" id="cam-frame-id">FRAME #0</span>
+    <nav class="screen-nav-bar">
+        <div class="screen-tabs-container">
+            <button class="screen-tab-btn active" id="tab-screen-1" data-screen="1" title="Shortcut: Press '1' on keyboard">
+                <span class="tab-key-badge">1</span>
+                <i class="fa-solid fa-map-location-dot"></i>
+                <div class="tab-label-group">
+                    <span class="tab-main-title">SCREEN 1: GPS TRACK & TELEMETRY</span>
+                    <span class="tab-sub-title">Orbital Ground Map & Sensor Suite Portals</span>
                 </div>
-                <div class="panel-body">
-                    <div class="ov7670-container">
-                        <!-- Top Info Bar -->
-                        <div class="ov7670-hud-bar">
-                            <div class="ov7670-meta">
-                                FMT: <span id="ov-fmt">RGB565</span> | RES: <span id="ov-res">160x120</span>
+            </button>
+            <button class="screen-tab-btn" id="tab-screen-2" data-screen="2" title="Shortcut: Press '2' on keyboard">
+                <span class="tab-key-badge">2</span>
+                <i class="fa-solid fa-cube"></i>
+                <div class="tab-label-group">
+                    <span class="tab-main-title">SCREEN 2: 1 RU CUBESAT 3D ATTITUDE</span>
+                    <span class="tab-sub-title">Real-Time Spacecraft Orientation & Motion Dynamics</span>
+                </div>
+            </button>
+        </div>
+        <div class="screen-nav-status-chips">
+            <div class="nav-chip">
+                <span class="chip-lbl">GPS:</span>
+                <span class="chip-val" id="nav-chip-gps">ACQUIRING</span>
+            </div>
+            <div class="nav-chip">
+                <span class="chip-lbl">ALT:</span>
+                <span class="chip-val" id="nav-chip-alt">0 m</span>
+            </div>
+            <div class="nav-chip">
+                <span class="chip-lbl">BATT:</span>
+                <span class="chip-val" id="nav-chip-batt">100%</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ===============================================================
+     * MULTI-SCREEN MAIN CONTAINER
+     * Hosts Screen 1 (GPS/TM), Screen 2 (Imagery/3D)
+     * =============================================================== -->
+    <main class="screens-container">
+
+        <!-- ---------------------------------------------------------------
+         * SCREEN 1: GPS TRACK MAP & TELEMETRY DATA PORTALS
+         * --------------------------------------------------------------- -->
+        <section id="screen-1-view" class="screen-view active">
+            <div class="screen-2-layout">
+                <!-- TOP HALF: UBLOX NEO-6M HYBRID GPS TRACK MAP -->
+                <div class="panel-card screen-2-map-card">
+                    <div class="panel-header">
+                        <div class="panel-title">
+                            <i class="fa-solid fa-earth-americas"></i>HYBRID GPS ORBITAL TRACK & GROUND STATION FOOTPRINT
+                        </div>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span class="panel-tag chip-neo" id="gps-sats-tag">HYBRID MAP (0 SATS)</span>
+                        </div>
+                    </div>
+                    <div class="panel-body map-panel-body">
+                        <div id="gps-map" class="map-container"></div>
+                        <div class="map-hud-overlay">
+                            <div class="map-stat-row">LAT: <span id="map-lat">30.768776°</span> | LON: <span id="map-lon">76.573955°</span> | SPD: <span id="map-spd">7.68 km/s</span></div>
+                            <div class="map-stat-row">ALT: <span id="map-alt">0.0 km</span> | FIX: <span id="map-sats">0 SATS</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BOTTOM HALF: TELEMETRY SENSOR PORTALS (4 EQUAL COLUMNS) -->
+                <div class="screen-2-telemetry-grid">
+                    <!-- TELEMETRY CARD 1: HW-072 LDR OPTICAL SENSOR (ILLUMINANCE, RAW ADC, DAY/NIGHT ECLIPSE) -->
+                    <div class="panel-card">
+                        <div class="panel-header">
+                            <div class="panel-title">
+                                <i class="fa-solid fa-sun"></i> HW-072 LDR SENSOR
                             </div>
-                            <div class="ov7670-status-badge" id="ov7670-status">
-                                STANDBY
+                            <span class="panel-tag chip-ldr">LDR OPTICAL</span>
+                        </div>
+                        <div class="panel-body">
+                            <div class="metric-summary">
+                                <div class="big-val-box">
+                                    <span class="big-val-label">ILLUMINANCE</span>
+                                    <div>
+                                        <span class="big-val-num" id="val-ldr-lux">0</span>
+                                        <span class="big-val-unit">Lux</span>
+                                    </div>
+                                </div>
+                                <div class="big-val-box" style="align-items: flex-end;">
+                                    <span class="big-val-label">RAW ADC</span>
+                                    <div>
+                                        <span class="big-val-num" id="val-ldr-adc" style="color:var(--accent-cyan);">0</span>
+                                        <span class="big-val-unit">/ 1023</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="chart-external" class="telemetry-chart"></canvas>
+                            </div>
+                            <div class="sub-metrics-grid">
+                                <div class="sub-metric-item">EXPOSURE: <strong id="val-ldr-exposure" style="color:var(--accent-emerald);">SUNLIT</strong></div>
+                                <div class="sub-metric-item">STATUS: <strong id="val-ldr-status" style="color:var(--accent-emerald);">ACTIVE</strong></div>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Canvas Wrapper for Photo -->
-                        <div class="ov7670-canvas-wrapper">
-                            <canvas id="ov7670-canvas" width="320" height="240" class="ov7670-canvas"></canvas>
-                            <div class="crosshair"></div>
+                    <!-- TELEMETRY CARD 2: DHT11 SENSOR (INTERNAL CABIN THERMAL & HUMIDITY) -->
+                    <div class="panel-card">
+                        <div class="panel-header">
+                            <div class="panel-title">
+                                <i class="fa-solid fa-microchip"></i> DHT11 AVIONICS
+                            </div>
+                            <span class="panel-tag chip-dht">DHT11 INT</span>
                         </div>
-
-                        <!-- Capture Frame Button -->
-                        <div class="ov7670-actions">
-                            <button class="btn-trigger-cam" id="btn-trigger-cam">
-                                <i class="fa-solid fa-camera"></i> CAPTURE FRAME
-                            </button>
+                        <div class="panel-body">
+                            <div class="metric-summary">
+                                <div class="big-val-box">
+                                    <span class="big-val-label">CABIN TEMP</span>
+                                    <div>
+                                        <span class="big-val-num" id="val-temp-int">0.0</span>
+                                        <span class="big-val-unit">°C</span>
+                                    </div>
+                                </div>
+                                <div class="big-val-box" style="align-items: flex-end;">
+                                    <span class="big-val-label">HUMIDITY</span>
+                                    <div>
+                                        <span class="big-val-num" id="val-hum-int" style="color:var(--accent-cyan);">0.0%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="chart-internal" class="telemetry-chart"></canvas>
+                            </div>
+                            <div class="sub-metrics-grid">
+                                <div class="sub-metric-item">CPU TEMP: <strong id="val-temp-cpu">0.0°C</strong></div>
+                                <div class="sub-metric-item">3V3 BUS: <strong id="val-board-volt">0.00 V</strong></div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- PANEL 2: 3D SPACE DAY CAD MODEL ORIENTATION & MOTION (CENTER) -->
-            <div class="panel-card">
-                <div class="panel-header">
-                    <div class="panel-title">
-                        <i class="fa-solid fa-cube"></i>SPACE DAY 3D CAD ORIENTATION
-                    </div>
-                    <span class="panel-tag chip-bmp" style="background: rgba(2, 132, 199, 0.15); color: #0284C7; border-color: #0284C7;">SPACE DAY (.STEP)</span>
-                    <button class="panel-btn" id="btn-reset-3d" title="Reset View Orientation">
-                        <i class="fa-solid fa-arrows-rotate"></i>
-                    </button>
-                </div>
-                <div class="panel-body panel-3d-body">
-                    <div id="cubesat-3d-canvas" class="three-canvas-container"></div>
-                    <div class="cubesat-hud-stats">
-                        <div class="hud-item">P: <span id="val-pitch">0.0°</span></div>
-                        <div class="hud-item">R: <span id="val-roll">0.0°</span></div>
-                        <div class="hud-item">Y: <span id="val-yaw">0.0°</span></div>
-                    </div>
-                </div>
+                    <!-- TELEMETRY CARD 3: EPS POWER SUBSYSTEM -->
+                    <div class="panel-card">
+                        <div class="panel-header">
+                            <div class="panel-title">
+                                <i class="fa-solid fa-bolt"></i> EPS POWER SUBSYSTEM
+                            </div>
+                            <span class="panel-tag chip-eps" id="val-eclipse">NOMINAL</span>
+                        </div>
+                        <div class="panel-body">
+                            <div class="metric-summary">
+                                <div class="big-val-box">
+                                    <span class="big-val-label">BATTERY</span>
+                                    <div>
+                                        <span class="big-val-num" id="val-battery-pct" style="color:var(--accent-emerald);">0.0%</span>
+                                    </div>
+                                </div>
+                                <div class="big-val-box" style="align-items: flex-end;">
+                                    <span class="big-val-label">SOLAR EPS</span>
+                                    <div>
+                                        <span class="big-val-num" id="val-solar-kw">0.000</span>
+                                        <span class="big-val-unit">kW</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="chart-power" class="telemetry-chart"></canvas>
+                            </div>
+                            <div class="sub-metrics-grid">
+                                <div class="sub-metric-item">BATT BUS: <strong id="val-batt-volt">0.00 V</strong></div>
+                                <div class="sub-metric-item">STATE: <strong id="val-power-state" style="color:var(--accent-emerald);">NOMINAL</strong></div>
+                            </div>
+                        </div>
+                    </div>                </div>
             </div>
-
-            <!-- PANEL 3: UBLOX NEO-6M GPS TRACK (RIGHT) -->
-            <div class="panel-card">
-                <div class="panel-header">
-                    <div class="panel-title">
-                        <i class="fa-solid fa-earth-americas"></i>HYBRID GPS TRACK MAP
-                    </div>
-                    <span class="panel-tag chip-neo" id="gps-sats-tag">HYBRID MAP (0 SATS)</span>
-                </div>
-                <div class="panel-body">
-                    <div id="gps-map" class="map-container"></div>
-                    <div class="map-hud-overlay">
-                        <div class="map-stat-row">LAT: <span id="map-lat">30.7688°</span> | LON: <span id="map-lon">76.5740°</span></div>
-                        <div class="map-stat-row">ALT: <span id="map-alt">0.0 km</span> | FIX: <span id="map-sats">0 SATS</span></div>
-                    </div>
-                </div>
-            </div>
-
         </section>
 
-        <!-- BOTTOM ROW: TELEMETRY SENSOR CHARTS (5 EQUAL COLUMNS) -->
-        <section class="bottom-row-grid">
-
-            <!-- TELEMETRY CARD 1: BMP280 SENSOR (EXTERNAL TEMP, PRESS, ALTITUDE) -->
-            <div class="panel-card">
-                <div class="panel-header">
-                    <div class="panel-title">
-                        <i class="fa-solid fa-temperature-quarter"></i> BMP280 SENSOR
+        <!-- ---------------------------------------------------------------
+         * SCREEN 2: SATELLITE IMAGERY & 3D ORIENTATION
+         * --------------------------------------------------------------- -->
+        <section id="screen-2-view" class="screen-view">
+            <div class="screen-3-layout">
+                <!-- 1 RU CUBESAT 3D ORIENTATION CONSOLE -->
+                <div class="screen-3-top-grid">
+                    <div class="panel-card screen-3-3d-card">
+                        <div class="panel-header">
+                            <div class="panel-title">
+                                <i class="fa-solid fa-cube"></i> 1 RU CUBESAT 3D ORIENTATION
+                            </div>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <span class="panel-tag chip-bmp" id="model-format-tag" style="background: var(--pal-blue-soft); color: var(--pal-blue-deep); border: 1px solid var(--pal-blue);">1 RU GENERIC (.GLB)</span>
+                                <button class="panel-btn" id="btn-reset-3d" title="Reset View Orientation">
+                                    <i class="fa-solid fa-arrows-rotate"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="panel-body panel-3d-body">
+                            <div id="cubesat-3d-canvas" class="three-canvas-container"></div>
+                            <div class="cubesat-hud-stats">
+                                <div class="hud-item">P: <span id="val-pitch">0.0°</span></div>
+                                <div class="hud-item">R: <span id="val-roll">0.0°</span></div>
+                                <div class="hud-item">Y: <span id="val-yaw">0.0°</span></div>
+                            </div>
+                            <div class="spacecraft-systems-hud">
+                                <div class="sys-hud-row">ADCS: <strong id="val-adcs-status">SUN POINTING</strong></div>
+                                <div class="sys-hud-row">GYRO: <strong id="val-gyro-xyz">0.0, 0.0, 0.0 °/s</strong></div>
+                            </div>
+                        </div>
                     </div>
-                    <span class="panel-tag chip-bmp">BMP280 EXT</span>
                 </div>
-                <div class="panel-body">
-                    <div class="metric-summary">
-                        <div class="big-val-box">
-                            <span class="big-val-label">TEMPERATURE</span>
-                            <div>
-                                <span class="big-val-num" id="val-temp-ext">0.0</span>
-                                <span class="big-val-unit">°C</span>
-                            </div>
+
+                <!-- BOTTOM ROW: MPU-9250 9-DOF IMU ATTITUDE & MOTION GRAPH -->
+                <div class="panel-card screen-3-motion-card">
+                    <div class="panel-header">
+                        <div class="panel-title">
+                            <i class="fa-solid fa-compass"></i> MPU 9250 9-DOF IMU ORIENTATION & MOTION DYNAMICS
                         </div>
-                        <div class="big-val-box" style="align-items: flex-end;">
-                            <span class="big-val-label">PRESSURE</span>
-                            <div>
-                                <span class="big-val-num" id="val-press-ext">0.0</span>
-                                <span class="big-val-unit">hPa</span>
-                            </div>
+                        <div class="motion-summary-chips">
+                            <div class="mchip">PITCH / ROLL: <strong id="val-sub-angles">0.0° / 0.0°</strong></div>
+                            <div class="mchip">YAW HEADING: <strong id="val-imu-yaw" style="color:var(--pal-red);">0.0°</strong></div>
                         </div>
                     </div>
-                    <div class="chart-container">
-                        <canvas id="chart-external" class="telemetry-chart"></canvas>
-                    </div>
-                    <div class="sub-metrics-grid">
-                        <div class="sub-metric-item">ALTITUDE: <strong id="val-bmp-alt">0 m</strong></div>
-                        <div class="sub-metric-item">STATUS: <strong id="val-bmp-status" style="color:var(--text-dim);">STANDBY</strong></div>
+                    <div class="panel-body motion-chart-body">
+                        <div class="chart-container-motion">
+                            <canvas id="chart-motion" class="telemetry-chart"></canvas>
+                        </div>
                     </div>
                 </div>
             </div>
-
-            <!-- TELEMETRY CARD 2: DHT11 SENSOR (INTERNAL CABIN THERMAL & HUMIDITY) -->
-            <div class="panel-card">
-                <div class="panel-header">
-                    <div class="panel-title">
-                        <i class="fa-solid fa-microchip"></i> DHT11 AVIONICS
-                    </div>
-                    <span class="panel-tag chip-dht">DHT11 INT</span>
-                </div>
-                <div class="panel-body">
-                    <div class="metric-summary">
-                        <div class="big-val-box">
-                            <span class="big-val-label">CABIN TEMP</span>
-                            <div>
-                                <span class="big-val-num" id="val-temp-int">0.0</span>
-                                <span class="big-val-unit">°C</span>
-                            </div>
-                        </div>
-                        <div class="big-val-box" style="align-items: flex-end;">
-                            <span class="big-val-label">HUMIDITY</span>
-                            <div>
-                                <span class="big-val-num" id="val-hum-int" style="color:var(--accent-cyan);">0.0%</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="chart-internal" class="telemetry-chart"></canvas>
-                    </div>
-                    <div class="sub-metrics-grid">
-                        <div class="sub-metric-item">CPU TEMP: <strong id="val-temp-cpu">0.0°C</strong></div>
-                        <div class="sub-metric-item">3V3 BUS: <strong id="val-board-volt">0.00 V</strong></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TELEMETRY CARD 3: HW-072 LDR & EPS POWER -->
-            <div class="panel-card">
-                <div class="panel-header">
-                    <div class="panel-title">
-                        <i class="fa-solid fa-solar-panel"></i> HW-072 LDR & EPS
-                    </div>
-                    <span class="panel-tag chip-ldr" id="val-eclipse">STANDBY</span>
-                </div>
-                <div class="panel-body">
-                    <div class="metric-summary">
-                        <div class="big-val-box">
-                            <span class="big-val-label">BATTERY</span>
-                            <div>
-                                <span class="big-val-num" id="val-battery-pct" style="color:var(--accent-emerald);">0.0%</span>
-                            </div>
-                        </div>
-                        <div class="big-val-box" style="align-items: flex-end;">
-                            <span class="big-val-label">SOLAR (LDR)</span>
-                            <div>
-                                <span class="big-val-num" id="val-solar-kw">0.000</span>
-                                <span class="big-val-unit">kW</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="chart-power" class="telemetry-chart"></canvas>
-                    </div>
-                    <div class="sub-metrics-grid">
-                        <div class="sub-metric-item">LDR ADC: <strong id="val-ldr-raw">0 / 1023</strong></div>
-                        <div class="sub-metric-item">BATT V: <strong id="val-batt-volt">0.00 V</strong></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TELEMETRY CARD 4: MPU 9250 9-DOF IMU & ORIENTATION -->
-            <div class="panel-card">
-                <div class="panel-header">
-                    <div class="panel-title">
-                        <i class="fa-solid fa-compass"></i> MPU 9250 9-DOF IMU
-                    </div>
-                    <span class="panel-tag chip-mpu">MPU-9250</span>
-                </div>
-                <div class="panel-body">
-                    <div class="metric-summary">
-                        <div class="big-val-box">
-                            <span class="big-val-label">PITCH / ROLL</span>
-                            <div>
-                                <span class="big-val-num" id="val-sub-angles">0.0° / 0.0°</span>
-                            </div>
-                        </div>
-                        <div class="big-val-box" style="align-items: flex-end;">
-                            <span class="big-val-label">YAW HEADING</span>
-                            <div>
-                                <span class="big-val-num" id="val-imu-yaw" style="color:var(--accent-amber);">0.0°</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="chart-motion" class="telemetry-chart"></canvas>
-                    </div>
-                    <div class="sub-metrics-grid">
-                        <div class="sub-metric-item">GYRO XYZ: <strong id="val-gyro-xyz">0.0, 0.0, 0.0 °/s</strong></div>
-                        <div class="sub-metric-item">ADCS: <strong id="val-adcs-status">STANDBY</strong></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TELEMETRY CARD 5: 440 MHz LoRa RF QUALITY (FREQUENCY MEDIUM) -->
-            <div class="panel-card">
-                <div class="panel-header">
-                    <div class="panel-title">
-                        <i class="fa-solid fa-tower-broadcast"></i> 440 MHz LoRa RF
-                    </div>
-                    <span class="panel-tag" id="rf-freq-badge" style="color:var(--accent-cyan); font-weight:700;">440.000 MHz</span>
-                </div>
-                <div class="panel-body">
-                    <div class="metric-summary">
-                        <div class="big-val-box">
-                            <span class="big-val-label">RSSI (SIGNAL)</span>
-                            <div>
-                                <span class="big-val-num" id="val-rssi" style="color:var(--accent-purple);">0.0</span>
-                                <span class="big-val-unit">dBm</span>
-                            </div>
-                        </div>
-                        <div class="big-val-box" style="align-items: flex-end;">
-                            <span class="big-val-label">SNR (QUALITY)</span>
-                            <div>
-                                <span class="big-val-num" id="val-snr">0.0</span>
-                                <span class="big-val-unit">dB</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="chart-rf" class="telemetry-chart"></canvas>
-                    </div>
-                    <div class="sub-metrics-grid">
-                        <div class="sub-metric-item">BANDWIDTH: <strong>125 kHz</strong></div>
-                        <div class="sub-metric-item">PACKETS: <strong id="val-packets">0</strong></div>
-                        <div class="sub-metric-item">LINK QUALITY: <strong id="val-rf-quality" style="color:var(--accent-cyan);">0%</strong></div>
-                        <div class="sub-metric-item">FREQ DRIFT: <strong id="val-rf-doppler">0.0 Hz</strong></div>
-                    </div>
-                </div>
-            </div>
-
         </section>
 
     </main>
@@ -397,10 +325,9 @@
             <span class="footer-timer" id="footer-timer">00:00:00</span>
         </div>
         <div class="footer-status-bar">
-            <div class="footer-item">LORA FREQUENCY: <span id="footer-freq" style="color:var(--accent-cyan);">440.000 MHz UHF</span></div>
-            <div class="footer-item">LORA HARDWARE: <span id="footer-lora-port">DISCONNECTED</span></div>
-            <div class="footer-item">SDR TCP/UDP: <span>12345 / 7373</span></div>
-            <div class="footer-item">MODULATION: <span>LoRa SF7 / BW125kHz</span></div>
+            <div class="footer-item">HARDWARE: <span id="footer-lora-port">DISCONNECTED</span></div>
+            <div class="footer-item">PACKETS RX: <span id="val-packets">0</span></div>
+            <div class="footer-item">STATUS: <span style="color:var(--pal-blue-deep); font-weight:700;">SYSTEM NOMINAL</span></div>
         </div>
     </footer>
 
@@ -500,7 +427,7 @@
                                 </div>
                                 <div class="obc-field-item">
                                     <i class="fa-solid fa-plug"></i>
-                                    <span>PORT: <strong style="color:var(--accent-amber);" id="obc-target-port">COM7</strong></span>
+                                    <span>PORT: <strong style="color:var(--pal-red);" id="obc-target-port">COM7</strong></span>
                                 </div>
                             </div>
                             <div class="obc-actions-group">
@@ -534,8 +461,10 @@
      * ------------------------------------------------------------------- -->
 
 
-    <!-- JS Libraries: Three.js, Chart.js, Leaflet -->
+    <!-- JS Libraries: Three.js, OrbitControls, GLTFLoader, Chart.js, Leaflet -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
