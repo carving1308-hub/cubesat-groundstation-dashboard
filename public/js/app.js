@@ -220,22 +220,22 @@ document.addEventListener('DOMContentLoaded', () => {
             legend: { display: false },
             tooltip: {
                 backgroundColor: '#FFFFFF',
-                borderColor: '#2563EB',
-                borderWidth: 1.5,
-                titleColor: '#0F172A',
-                bodyColor: '#1E3A8A',
-                titleFont: { family: 'Outfit', size: 11, weight: 'bold' },
+                borderColor: '#E4E9E6',
+                borderWidth: 1,
+                titleColor: '#202622',
+                bodyColor: '#515B55',
+                titleFont: { family: 'Inter', size: 11, weight: '600' },
                 bodyFont: { family: 'JetBrains Mono', size: 10 }
             }
         },
         scales: {
             x: {
-                grid: { color: 'rgba(37, 99, 235, 0.08)' },
-                ticks: { color: '#1E3A8A', font: { family: 'Outfit', size: 9, weight: 'bold' }, maxTicksLimit: 6 }
+                grid: { color: '#E4E9E6' },
+                ticks: { color: '#77817B', font: { family: 'Inter', size: 9, weight: '600' }, maxTicksLimit: 6 }
             },
             y: {
-                grid: { color: 'rgba(37, 99, 235, 0.08)' },
-                ticks: { color: '#1E3A8A', font: { family: 'Outfit', size: 9, weight: 'bold' } }
+                grid: { color: '#E4E9E6' },
+                ticks: { color: '#77817B', font: { family: 'Inter', size: 9, weight: '600' } }
             }
         }
     };
@@ -255,8 +255,8 @@ document.addEventListener('DOMContentLoaded', () => {
         {
             label: 'Altitude (m)',
             data: [],
-            borderColor: '#2563EB',
-            backgroundColor: 'rgba(37, 99, 235, 0.12)',
+            borderColor: '#159B72',
+            backgroundColor: 'rgba(21, 155, 114, 0.08)',
             fill: true,
             borderWidth: 2.5,
             pointRadius: 0,
@@ -266,8 +266,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Chart 1: HW-072 LDR Optical & Illuminance Sensors
     const chartEnv = createChart('chart-external', [
-        { label: 'Illuminance (Lux)', data: [], borderColor: '#2563EB', borderWidth: 2, pointRadius: 0, tension: 0.3 },
-        { label: 'Raw ADC (0-1023)', data: [], borderColor: '#DC2626', borderWidth: 1.5, pointRadius: 0, tension: 0.3, yAxisID: 'y1' }
+        { label: 'Illuminance (Lux)', data: [], borderColor: '#159B72', borderWidth: 2, pointRadius: 0, tension: 0.3 },
+        { label: 'Raw ADC (0-1023)', data: [], borderColor: '#D49A2A', borderWidth: 1.5, pointRadius: 0, tension: 0.3, yAxisID: 'y1' }
     ]);
     if (chartEnv && chartEnv.options && chartEnv.options.scales) {
         chartEnv.options.scales.y1 = {
@@ -275,38 +275,38 @@ document.addEventListener('DOMContentLoaded', () => {
             min: 0,
             max: 1023,
             grid: { drawOnChartArea: false },
-            ticks: { color: '#DC2626', font: { family: 'Outfit', size: 9, weight: 'bold' } }
+            ticks: { color: '#8B72E8', font: { family: 'Inter', size: 9, weight: '600' } }
         };
     }
 
     // Chart 2: DHT11 Internal Temperature & Thermal
     const chartInt = createChart('chart-internal', [
-        { label: 'DHT11 Temp (°C)', data: [], borderColor: '#DC2626', borderWidth: 2, pointRadius: 0, tension: 0.3 }
+        { label: 'DHT11 Temp (°C)', data: [], borderColor: '#D49A2A', borderWidth: 2, pointRadius: 0, tension: 0.3 }
     ]);
 
     // Chart 3: HW-072 LDR & Power Subsystem
     const chartPower = createChart('chart-power', [
-        { label: 'Battery (%)', data: [], borderColor: '#2563EB', borderWidth: 2, pointRadius: 0, tension: 0.3 },
-        { label: 'LDR Solar (kW)', data: [], borderColor: '#DC2626', borderWidth: 2, pointRadius: 0, tension: 0.3 }
+        { label: 'Battery (%)', data: [], borderColor: '#159B72', borderWidth: 2, pointRadius: 0, tension: 0.3 },
+        { label: 'LDR Solar (kW)', data: [], borderColor: '#D49A2A', borderWidth: 2, pointRadius: 0, tension: 0.3 }
     ]);
 
     // Chart 4: MPU 9250 IMU Orientation & Motion
     const chartMotion = createChart('chart-motion', [
-        { label: 'Pitch (°)', data: [], borderColor: '#2563EB', borderWidth: 1.5, pointRadius: 0 },
-        { label: 'Roll (°)', data: [], borderColor: '#DC2626', borderWidth: 1.5, pointRadius: 0 },
+        { label: 'Pitch (°)', data: [], borderColor: '#159B72', borderWidth: 1.5, pointRadius: 0 },
+        { label: 'Roll (°)', data: [], borderColor: '#D49A2A', borderWidth: 1.5, pointRadius: 0 },
         { label: 'Yaw (°)', data: [], borderColor: '#1D4ED8', borderWidth: 1.5, pointRadius: 0 }
     ]);
 
     // Chart 5: 440 MHz LoRa RF Signal Quality from Frequency Medium
     const chartRf = createChart('chart-rf', [
-        { label: 'RSSI (dBm)', data: [], borderColor: '#2563EB', borderWidth: 2, pointRadius: 0, tension: 0.3 },
-        { label: 'SNR (dB)', data: [], borderColor: '#DC2626', borderWidth: 1.5, pointRadius: 0, tension: 0.3, yAxisID: 'y1' }
+        { label: 'RSSI (dBm)', data: [], borderColor: '#159B72', borderWidth: 2, pointRadius: 0, tension: 0.3 },
+        { label: 'SNR (dB)', data: [], borderColor: '#D49A2A', borderWidth: 1.5, pointRadius: 0, tension: 0.3, yAxisID: 'y1' }
     ]);
     if (chartRf && chartRf.options && chartRf.options.scales) {
         chartRf.options.scales.y1 = {
             position: 'right',
             grid: { drawOnChartArea: false },
-            ticks: { color: '#DC2626', font: { family: 'Outfit', size: 9, weight: 'bold' } }
+            ticks: { color: '#8B72E8', font: { family: 'Inter', size: 9, weight: '600' } }
         };
     }
 

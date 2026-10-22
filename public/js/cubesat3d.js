@@ -77,7 +77,7 @@ class CubeSat3D {
         this.scene.add(earthLight);
 
         // Internal Telemetry Beacon PointLight (reacts to packet ingestion & temperature)
-        this.coreLight = new THREE.PointLight(0x2563EB, 2.0, 5);
+        this.coreLight = new THREE.PointLight(0x159B72, 2.0, 5);
         this.coreLight.position.set(0, 0, 0);
         this.scene.add(this.coreLight);
 
@@ -87,7 +87,7 @@ class CubeSat3D {
         // RF Ingestion Pulse Ring (Expands when telemetry packets arrive)
         const pulseGeo = new THREE.RingGeometry(1.2, 1.35, 32);
         const pulseMat = new THREE.MeshBasicMaterial({
-            color: 0x2563EB,
+            color: 0x159B72,
             side: THREE.DoubleSide,
             transparent: true,
             opacity: 0.0
@@ -101,7 +101,7 @@ class CubeSat3D {
         this.load1UCubeSatModel();
 
         // 7. Aerospace Coordinate Reference Grid
-        const gridHelper = new THREE.GridHelper(10, 20, 0x2563EB, 0xE2E8F0);
+        const gridHelper = new THREE.GridHelper(10, 20, 0x159B72, 0xE2E8F0);
         gridHelper.position.y = -2;
         this.scene.add(gridHelper);
 
@@ -145,7 +145,7 @@ class CubeSat3D {
 
         // Crisp Outer Wireframe
         const wireframeGeo = new THREE.BoxGeometry(size * 1.04, size * 1.04, size * 1.04);
-        const wireframeMat = new THREE.MeshBasicMaterial({ color: 0x2563EB, wireframe: true, transparent: true, opacity: 0.45 });
+        const wireframeMat = new THREE.MeshBasicMaterial({ color: 0x159B72, wireframe: true, transparent: true, opacity: 0.45 });
         this.placeholderWire = new THREE.Mesh(wireframeGeo, wireframeMat);
         this.cubeSatGroup.add(this.placeholderWire);
     }
@@ -239,7 +239,7 @@ class CubeSat3D {
                 this.coreLight.color.setHex(0xEA580C); // Warm Orange (28°C-35°C)
                 this.coreLight.intensity = 2.4;
             } else {
-                this.coreLight.color.setHex(0x2563EB); // Nominal Aerospace Royal Blue
+                this.coreLight.color.setHex(0x159B72); // Nominal Aerospace Royal Blue
                 this.coreLight.intensity = 1.8;
             }
         }
@@ -258,7 +258,7 @@ class CubeSat3D {
             if (rssi !== undefined && rssi !== null && rssi < -100) {
                 this.pulseMesh.material.color.setHex(0xDC2626);
             } else {
-                this.pulseMesh.material.color.setHex(0x2563EB);
+                this.pulseMesh.material.color.setHex(0x159B72);
             }
         }
     }
