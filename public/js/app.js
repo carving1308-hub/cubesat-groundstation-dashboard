@@ -258,81 +258,77 @@ document.addEventListener('DOMContentLoaded', () => {
             borderColor: '#159B72',
             backgroundColor: 'rgba(21, 155, 114, 0.08)',
             fill: true,
-            borderWidth: 2.5,
+            borderWidth: 2,
             pointRadius: 0,
-            tension: 0.35
+            tension: 0.3
         }
     ]);
 
-    // Chart 1: HW-072 LDR Optical & Illuminance Sensors
-    const chartEnv = createChart('chart-external', [
-        { label: 'Illuminance (Lux)', data: [], borderColor: '#159B72', borderWidth: 2, pointRadius: 0, tension: 0.3 },
-        { label: 'Raw ADC (0-1023)', data: [], borderColor: '#D49A2A', borderWidth: 1.5, pointRadius: 0, tension: 0.3, yAxisID: 'y1' }
+    // Screen 1: Atmospheric Thermodynamics & Barometric Lapse Rate (TMP117, MS5611, HDC3022)
+    const chartThermoDynamics = createChart('chart-thermo-dynamics', [
+        { label: 'TMP117 Temp (°C)', data: [], borderColor: '#159B72', backgroundColor: 'rgba(21, 155, 114, 0.05)', fill: true, borderWidth: 2, pointRadius: 0, tension: 0.3, yAxisID: 'y' },
+        { label: 'MS5611 Press (hPa)', data: [], borderColor: '#3989D8', borderWidth: 1.8, pointRadius: 0, tension: 0.3, yAxisID: 'y1' },
+        { label: 'HDC3022 Humidity (%)', data: [], borderColor: '#D49A2A', borderWidth: 1.5, pointRadius: 0, tension: 0.3, yAxisID: 'y2' }
     ]);
-    if (chartEnv && chartEnv.options && chartEnv.options.scales) {
-        chartEnv.options.scales.y1 = {
+    if (chartThermoDynamics && chartThermoDynamics.options && chartThermoDynamics.options.scales) {
+        chartThermoDynamics.options.scales.y = {
+            position: 'left',
+            grid: { color: 'rgba(228, 233, 230, 0.6)' },
+            ticks: { color: '#159B72', font: { family: 'Inter', size: 9, weight: '600' } }
+        };
+        chartThermoDynamics.options.scales.y1 = {
             position: 'right',
-            min: 0,
-            max: 1023,
             grid: { drawOnChartArea: false },
-            ticks: { color: '#8B72E8', font: { family: 'Inter', size: 9, weight: '600' } }
+            ticks: { color: '#3989D8', font: { family: 'Inter', size: 9, weight: '600' } }
+        };
+        chartThermoDynamics.options.scales.y2 = {
+            position: 'right',
+            grid: { drawOnChartArea: false },
+            ticks: { color: '#D49A2A', font: { family: 'Inter', size: 9, weight: '600' } }
         };
     }
 
-    // Chart 2: DHT11 Internal Temperature & Thermal
-    const chartInt = createChart('chart-internal', [
-        { label: 'DHT11 Temp (°C)', data: [], borderColor: '#D49A2A', borderWidth: 2, pointRadius: 0, tension: 0.3 }
+    // Screen 1: Stratospheric Ozone & Spectral UV Dynamics (ULPSM-03, AS7331)
+    const chartStratoDynamics = createChart('chart-strato-dynamics', [
+        { label: 'ULPSM-03 Ozone (ppb)', data: [], borderColor: '#159B72', backgroundColor: 'rgba(21, 155, 114, 0.05)', fill: true, borderWidth: 2, pointRadius: 0, tension: 0.3, yAxisID: 'y' },
+        { label: 'AS7331 UV Index', data: [], borderColor: '#8B72E8', borderWidth: 1.8, pointRadius: 0, tension: 0.3, yAxisID: 'y1' },
+        { label: 'AS7331 UVA (W/m²)', data: [], borderColor: '#3989D8', borderWidth: 1.5, pointRadius: 0, tension: 0.3, yAxisID: 'y2' }
     ]);
-
-    // Chart 3: HW-072 LDR & Power Subsystem
-    const chartPower = createChart('chart-power', [
-        { label: 'Battery (%)', data: [], borderColor: '#159B72', borderWidth: 2, pointRadius: 0, tension: 0.3 },
-        { label: 'LDR Solar (kW)', data: [], borderColor: '#D49A2A', borderWidth: 2, pointRadius: 0, tension: 0.3 }
-    ]);
-
-    // Chart 4: MPU 9250 IMU Orientation & Motion
-    const chartMotion = createChart('chart-motion', [
-        { label: 'Pitch (°)', data: [], borderColor: '#159B72', borderWidth: 1.5, pointRadius: 0 },
-        { label: 'Roll (°)', data: [], borderColor: '#D49A2A', borderWidth: 1.5, pointRadius: 0 },
-        { label: 'Yaw (°)', data: [], borderColor: '#1D4ED8', borderWidth: 1.5, pointRadius: 0 }
-    ]);
-
-    // Chart 5: 440 MHz LoRa RF Signal Quality from Frequency Medium
-    const chartRf = createChart('chart-rf', [
-        { label: 'RSSI (dBm)', data: [], borderColor: '#159B72', borderWidth: 2, pointRadius: 0, tension: 0.3 },
-        { label: 'SNR (dB)', data: [], borderColor: '#D49A2A', borderWidth: 1.5, pointRadius: 0, tension: 0.3, yAxisID: 'y1' }
-    ]);
-    if (chartRf && chartRf.options && chartRf.options.scales) {
-        chartRf.options.scales.y1 = {
+    if (chartStratoDynamics && chartStratoDynamics.options && chartStratoDynamics.options.scales) {
+        chartStratoDynamics.options.scales.y = {
+            position: 'left',
+            grid: { color: 'rgba(228, 233, 230, 0.6)' },
+            ticks: { color: '#159B72', font: { family: 'Inter', size: 9, weight: '600' } }
+        };
+        chartStratoDynamics.options.scales.y1 = {
             position: 'right',
             grid: { drawOnChartArea: false },
             ticks: { color: '#8B72E8', font: { family: 'Inter', size: 9, weight: '600' } }
         };
+        chartStratoDynamics.options.scales.y2 = {
+            position: 'right',
+            grid: { drawOnChartArea: false },
+            ticks: { color: '#3989D8', font: { family: 'Inter', size: 9, weight: '600' } }
+        };
     }
 
-    // -------------------------------------------------------------------
-    // HIGH-SPEED GRAPH ENGINE: requestAnimationFrame & INCREMENTAL UPDATES
-    // -------------------------------------------------------------------
+    // High-speed Chart Engine
     let chartRenderPending = false;
     let lastChartUpdateTime = 0;
 
     function requestChartDraw(force = false) {
         const now = performance.now();
-        // Redraw canvases at high-speed 40-50 Hz rate (~20ms) for ultra-fast response
-        if (!force && (chartRenderPending || (now - lastChartUpdateTime < 20))) return;
+        if (!force && (chartRenderPending || (now - lastChartUpdateTime < 25))) return;
 
         chartRenderPending = true;
         requestAnimationFrame(() => {
             chartRenderPending = false;
             lastChartUpdateTime = performance.now();
             if (currentActiveScreen === 1) {
-                if (chartAltitudeProfile) chartAltitudeProfile.update('none');
-                if (chartEnv) chartEnv.update('none');
-                if (chartInt) chartInt.update('none');
-                if (chartPower) chartPower.update('none');
-                if (chartRf) chartRf.update('none');
+                if (chartThermoDynamics) chartThermoDynamics.update('none');
+                if (chartStratoDynamics) chartStratoDynamics.update('none');
             } else if (currentActiveScreen === 2) {
-                if (chartMotion) chartMotion.update('none');
+                if (chartAltitudeProfile) chartAltitudeProfile.update('none');
             }
         });
     }
@@ -344,64 +340,35 @@ document.addEventListener('DOMContentLoaded', () => {
         if (chartAltitudeProfile) {
             chartAltitudeProfile.data.labels.push(timeLabel);
             chartAltitudeProfile.data.datasets[0].data.push(p.alt_m !== undefined ? p.alt_m : 0);
-            if (chartAltitudeProfile.data.labels.length > 50) {
+            if (chartAltitudeProfile.data.labels.length > 40) {
                 chartAltitudeProfile.data.labels.shift();
                 chartAltitudeProfile.data.datasets[0].data.shift();
             }
         }
 
-        if (chartEnv) {
-            chartEnv.data.labels.push(timeLabel);
-            chartEnv.data.datasets[0].data.push(p.temp_ext);
-            chartEnv.data.datasets[1].data.push(p.press);
-            if (chartEnv.data.labels.length > 50) {
-                chartEnv.data.labels.shift();
-                chartEnv.data.datasets[0].data.shift();
-                chartEnv.data.datasets[1].data.shift();
+        if (chartThermoDynamics) {
+            chartThermoDynamics.data.labels.push(timeLabel);
+            chartThermoDynamics.data.datasets[0].data.push(p.tmp117_temp !== undefined ? p.tmp117_temp : (p.temp_ext !== undefined ? p.temp_ext : 24.0));
+            chartThermoDynamics.data.datasets[1].data.push(p.ms5611_press !== undefined ? p.ms5611_press : (p.press !== undefined ? p.press : 1013.2));
+            chartThermoDynamics.data.datasets[2].data.push(p.hdc3022_hum !== undefined ? p.hdc3022_hum : (p.hum !== undefined ? p.hum : 48.0));
+            if (chartThermoDynamics.data.labels.length > 40) {
+                chartThermoDynamics.data.labels.shift();
+                chartThermoDynamics.data.datasets[0].data.shift();
+                chartThermoDynamics.data.datasets[1].data.shift();
+                chartThermoDynamics.data.datasets[2].data.shift();
             }
         }
 
-        if (chartInt) {
-            chartInt.data.labels.push(timeLabel);
-            chartInt.data.datasets[0].data.push(p.temp_int);
-            if (chartInt.data.labels.length > 50) {
-                chartInt.data.labels.shift();
-                chartInt.data.datasets[0].data.shift();
-            }
-        }
-
-        if (chartPower) {
-            chartPower.data.labels.push(timeLabel);
-            chartPower.data.datasets[0].data.push(p.battery);
-            chartPower.data.datasets[1].data.push(p.solar_kw);
-            if (chartPower.data.labels.length > 50) {
-                chartPower.data.labels.shift();
-                chartPower.data.datasets[0].data.shift();
-                chartPower.data.datasets[1].data.shift();
-            }
-        }
-
-        if (chartMotion) {
-            chartMotion.data.labels.push(timeLabel);
-            chartMotion.data.datasets[0].data.push(p.pitch);
-            chartMotion.data.datasets[1].data.push(p.roll);
-            chartMotion.data.datasets[2].data.push(p.yaw);
-            if (chartMotion.data.labels.length > 50) {
-                chartMotion.data.labels.shift();
-                chartMotion.data.datasets[0].data.shift();
-                chartMotion.data.datasets[1].data.shift();
-                chartMotion.data.datasets[2].data.shift();
-            }
-        }
-
-        if (chartRf) {
-            chartRf.data.labels.push(timeLabel);
-            chartRf.data.datasets[0].data.push(p.rssi);
-            if (chartRf.data.datasets[1]) chartRf.data.datasets[1].data.push(p.snr !== undefined ? p.snr : 0);
-            if (chartRf.data.labels.length > 50) {
-                chartRf.data.labels.shift();
-                chartRf.data.datasets[0].data.shift();
-                if (chartRf.data.datasets[1]) chartRf.data.datasets[1].data.shift();
+        if (chartStratoDynamics) {
+            chartStratoDynamics.data.labels.push(timeLabel);
+            chartStratoDynamics.data.datasets[0].data.push(p.ulpsm_o3 !== undefined ? p.ulpsm_o3 : 35.0);
+            chartStratoDynamics.data.datasets[1].data.push(p.as7331_uvi !== undefined ? p.as7331_uvi : 3.0);
+            chartStratoDynamics.data.datasets[2].data.push(p.as7331_uva !== undefined ? p.as7331_uva : 24.0);
+            if (chartStratoDynamics.data.labels.length > 40) {
+                chartStratoDynamics.data.labels.shift();
+                chartStratoDynamics.data.datasets[0].data.shift();
+                chartStratoDynamics.data.datasets[1].data.shift();
+                chartStratoDynamics.data.datasets[2].data.shift();
             }
         }
 
@@ -418,42 +385,23 @@ document.addEventListener('DOMContentLoaded', () => {
             chartAltitudeProfile.data.datasets[0].data = history.map(h => (h.alt_m !== undefined ? h.alt_m : 0));
         }
 
-        if (chartEnv) {
-            chartEnv.data.labels = labels;
-            chartEnv.data.datasets[0].data = history.map(h => h.temp_ext);
-            chartEnv.data.datasets[1].data = history.map(h => h.press);
+        if (chartThermoDynamics) {
+            chartThermoDynamics.data.labels = labels;
+            chartThermoDynamics.data.datasets[0].data = history.map(h => (h.tmp117_temp !== undefined ? h.tmp117_temp : (h.temp_ext !== undefined ? h.temp_ext : 24.0)));
+            chartThermoDynamics.data.datasets[1].data = history.map(h => (h.ms5611_press !== undefined ? h.ms5611_press : (h.press !== undefined ? h.press : 1013.2)));
+            chartThermoDynamics.data.datasets[2].data = history.map(h => (h.hdc3022_hum !== undefined ? h.hdc3022_hum : (h.hum !== undefined ? h.hum : 48.0)));
         }
 
-        if (chartInt) {
-            chartInt.data.labels = labels;
-            chartInt.data.datasets[0].data = history.map(h => h.temp_int);
+        if (chartStratoDynamics) {
+            chartStratoDynamics.data.labels = labels;
+            chartStratoDynamics.data.datasets[0].data = history.map(h => (h.ulpsm_o3 !== undefined ? h.ulpsm_o3 : 35.0));
+            chartStratoDynamics.data.datasets[1].data = history.map(h => (h.as7331_uvi !== undefined ? h.as7331_uvi : 3.0));
+            chartStratoDynamics.data.datasets[2].data = history.map(h => (h.as7331_uva !== undefined ? h.as7331_uva : 24.0));
         }
 
-        if (chartPower) {
-            chartPower.data.labels = labels;
-            chartPower.data.datasets[0].data = history.map(h => h.battery);
-            chartPower.data.datasets[1].data = history.map(h => h.solar_kw);
-        }
-
-        if (chartMotion) {
-            chartMotion.data.labels = labels;
-            chartMotion.data.datasets[0].data = history.map(h => h.pitch);
-            chartMotion.data.datasets[1].data = history.map(h => h.roll);
-            chartMotion.data.datasets[2].data = history.map(h => h.yaw);
-        }
-
-        if (chartRf) {
-            chartRf.data.labels = labels;
-            chartRf.data.datasets[0].data = history.map(h => h.rssi);
-            if (chartRf.data.datasets[1]) {
-                chartRf.data.datasets[1].data = history.map(h => h.snr !== undefined ? h.snr : 0);
-            }
-        }
-
-        requestChartDraw();
+        requestChartDraw(true);
     }
 
-    // -------------------------------------------------------------------
     // 5. WEBSOCKET TELEMETRY STREAM & PACKET ACTIVITY WATCHDOG
     // -------------------------------------------------------------------
     let ws = null;
