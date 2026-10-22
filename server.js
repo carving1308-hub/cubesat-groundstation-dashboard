@@ -166,8 +166,58 @@ let telemetryState = {
         hex_data: ""
     },
 
-    // Decoded Sensor Complement (BMP280, MPU9250, DHT11, Ublox NEO-6M, HW-072 LDR, OV7670)
+    // Decoded Sensor Complement: TMP117, MS5611, HDC3022, LSM9DS1, ULPSM-O3, AS7331
     sensors: {
+        tmp117: {
+            temp_c: 24.0,
+            alert_status: "NOMINAL",
+            accuracy_c: 0.1,
+            status: "STANDBY"
+        },
+        ms5611: {
+            pressure_hpa: 1013.25,
+            altitude_m: 0,
+            temp_c: 24.0,
+            vert_spd_ms: 0.0,
+            status: "STANDBY"
+        },
+        hdc3022: {
+            humidity_pct: 48.0,
+            temp_c: 22.0,
+            dew_point_c: 10.5,
+            status: "STANDBY"
+        },
+        lsm9ds1: {
+            pitch_deg: 0.0,
+            roll_deg: 0.0,
+            yaw_deg: 0.0,
+            gyro_x: 0.0,
+            gyro_y: 0.0,
+            gyro_z: 0.0,
+            accel_x: 0.0,
+            accel_y: 0.0,
+            accel_z: 1.0,
+            accel_mag_g: 1.0,
+            mag_x: 0.22,
+            mag_y: -0.15,
+            mag_z: 0.42,
+            status: "STANDBY"
+        },
+        ulpsm_o3: {
+            ozone_ppb: 35.0,
+            ozone_ppm: 0.035,
+            v_gas_mv: 1230,
+            baseline_ppb: 35.0,
+            status: "STANDBY"
+        },
+        as7331: {
+            uva_mw_m2: 24.0,
+            uvb_mw_m2: 1.2,
+            uvc_mw_m2: 0.0,
+            uv_index: 3.0,
+            total_irradiance: 25.2,
+            status: "STANDBY"
+        },
         bmp280: {
             temp_c: 0.0,
             pressure_hpa: 0.0,
@@ -561,13 +611,96 @@ function updateSimulator(dtSec = 0.15) {
         telemetryState.rf.link_quality_pct = Math.max(0, Math.min(100, Math.round(((rssi + 130) / 80) * 60 + ((snr + 10) / 25) * 40)));
         telemetryState.last_sdr_packet_time = Date.now();
 
+        // -------------------------------------------------------------
+        // Scientific Sensor Complement: TMP117, MS5611, HDC3022, LSM9DS1, ULPSM-O3, AS7331
+        // -------------------------------------------------------------
+        // 1. TMP117: High-Precision Digital Temperature Sensor (±0.1°C NIST Accuracy)
+        let tAmbient = 24.0;
+        if (alt_m < 11000) {
+            tAmbient = 24.0 - (alt_m * 0.0065); // Standard Tropospheric Lapse Rate
+        } else {
+            const stratRatio = (alt_m - 11000) / 19000;
+            tAmbient = -47.5 + (stratRatio * 27.5); // Stratospheric Inversion
+        }
+        const tmp117_temp = parseFloat((tAmbient + 0.06 * Math.sin(simAngle * 1.5)).toFixed(2));
+
+        // 2. MS5611-01BA03: High-Resolution Barometric Pressure & Altimeter (24-bit ΔΣ ADC)
+        const ms5611_press = baroPress;
+        const ms5611_alt = Math.round(alt_m);
+        const ms5611_temp = parseFloat((baroTemp + 0.25 * Math.sin(simAngle * 0.8)).toFixed(2));
+        const ms5611_vert_spd = vert_spd;
+
+        // 3. HDC3022: Precision Relative Humidity & Temperature Sensor
+        let hdcHumid = 48.0;
+        if (alt_m < 11000) {
+            hdcHumid = Math.max(12.0, 48.0 - (alt_m / 11000.0) * 36.0 + 2.5 * Math.sin(simAngle * 0.2));
+        } else {
+            hdcHumid = Math.max(1.8, 6.0 - ((alt_m - 11000) / 19000.0) * 4.2 + 0.4 * Math.sin(simAngle * 0.3));
+        }
+        const hdc3022_hum = parseFloat(hdcHumid.toFixed(1));
+        const hdc3022_temp = parseFloat((21.8 + 1.5 * Math.sin(simAngle * 0.1)).toFixed(2));
+        const alphaHdc = ((17.27 * hdc3022_temp) / (237.7 + hdc3022_temp)) + Math.log(Math.max(0.01, hdc3022_hum / 100.0));
+        const hdc3022_dew = parseFloat(((237.7 * alphaHdc) / (17.27 - alphaHdc)).toFixed(1));
+
+        // 4. LSM9DS1: 9-Degrees-of-Freedom IMU (Tri-axial Accel, Gyro, Mag)
+        const lsm9ds1_pitch = pitch;
+        const lsm9ds1_roll = roll;
+        const lsm9ds1_yaw = parseFloat(yaw.toFixed(1));
+        const lsm9ds1_gyro_x = gyro_x;
+        const lsm9ds1_gyro_y = gyro_y;
+        const lsm9ds1_gyro_z = gyro_z;
+        const lsm9ds1_accel_x = parseFloat((0.04 * Math.sin(simAngle * 2.1)).toFixed(3));
+        const lsm9ds1_accel_y = parseFloat((0.03 * Math.cos(simAngle * 1.8)).toFixed(3));
+        const lsm9ds1_accel_z = parseFloat(g_force.toFixed(3));
+        const lsm9ds1_accel_mag = parseFloat(Math.sqrt(lsm9ds1_accel_x**2 + lsm9ds1_accel_y**2 + lsm9ds1_accel_z**2).toFixed(2));
+        const lsm9ds1_mag_x = parseFloat((0.218 + 0.015 * Math.sin(yaw * Math.PI / 180)).toFixed(3));
+        const lsm9ds1_mag_y = parseFloat((-0.145 + 0.015 * Math.cos(yaw * Math.PI / 180)).toFixed(3));
+        const lsm9ds1_mag_z = parseFloat((0.422 + 0.005 * Math.sin(simAngle * 0.5)).toFixed(3));
+
+        // 5. ULPSM-03 / ULPSM-O3: Stratospheric Ozone (O3) Electrochemical Sensor
+        let o3Ppb = 35.0;
+        if (alt_m < 8000) {
+            o3Ppb = 32.0 + (alt_m / 8000.0) * 15.0;
+        } else if (alt_m < 26000) {
+            const frac = (alt_m - 8000) / 18000;
+            o3Ppb = 47.0 + 460.0 * Math.sin(frac * Math.PI / 2);
+        } else {
+            const frac2 = (alt_m - 26000) / 4000;
+            o3Ppb = 507.0 - frac2 * 25.0;
+        }
+        o3Ppb = parseFloat((o3Ppb + 3.2 * Math.sin(simAngle * 0.7)).toFixed(1));
+        const o3Ppm = parseFloat((o3Ppb / 1000.0).toFixed(4));
+        const vGasMv = Math.round(1200 + (o3Ppb / 520.0) * 480);
+
+        // 6. AS7331: Spectral 3-Channel UVA, UVB, UVC & UV Index
+        const altRatio = Math.min(1.0, alt_m / 30000.0);
+        const uva = parseFloat((22.0 + 46.5 * altRatio + 1.2 * Math.sin(simAngle * 0.4)).toFixed(1));
+        const uvb = parseFloat((1.1 + 16.2 * Math.pow(altRatio, 1.3) + 0.4 * Math.sin(simAngle * 0.5)).toFixed(2));
+        const uvc = parseFloat((alt_m > 16000 ? ((alt_m - 16000) / 14000.0) * 2.2 + 0.1 * Math.sin(simAngle * 0.6) : 0.0).toFixed(2));
+        const uvIndex = parseFloat((2.8 + 12.2 * altRatio + 0.3 * Math.sin(simAngle * 0.3)).toFixed(1));
+
+        // Camera frame update
+        if (telemetryState.camera) {
+            telemetryState.camera.last_captured = Date.now();
+            telemetryState.camera.exposure_ms = parseFloat((24.0 + 8.0 * Math.sin(simAngle * 0.1)).toFixed(1));
+        }
+
         // Synchronize sensors object
         telemetryState.sensors = {
+            tmp117: { temp_c: tmp117_temp, alert_status: "NOMINAL", accuracy_c: 0.1, status: "NOMINAL" },
+            ms5611: { pressure_hpa: ms5611_press, altitude_m: ms5611_alt, temp_c: ms5611_temp, vert_spd_ms: ms5611_vert_spd, status: "NOMINAL" },
+            hdc3022: { humidity_pct: hdc3022_hum, temp_c: hdc3022_temp, dew_point_c: hdc3022_dew, status: "NOMINAL" },
+            lsm9ds1: { pitch_deg: lsm9ds1_pitch, roll_deg: lsm9ds1_roll, yaw_deg: lsm9ds1_yaw, gyro_x: lsm9ds1_gyro_x, gyro_y: lsm9ds1_gyro_y, gyro_z: lsm9ds1_gyro_z, accel_x: lsm9ds1_accel_x, accel_y: lsm9ds1_accel_y, accel_z: lsm9ds1_accel_z, accel_mag_g: lsm9ds1_accel_mag, mag_x: lsm9ds1_mag_x, mag_y: lsm9ds1_mag_y, mag_z: lsm9ds1_mag_z, status: "NOMINAL" },
+            ulpsm_o3: { ozone_ppb: o3Ppb, ozone_ppm: o3Ppm, v_gas_mv: vGasMv, baseline_ppb: 35.0, status: alt_m > 12000 ? "STRATOSPHERIC_O3_ACTIVE" : "NOMINAL" },
+            as7331: { uva_mw_m2: uva, uvb_mw_m2: uvb, uvc_mw_m2: uvc, uv_index: uvIndex, total_irradiance: parseFloat((uva + uvb + uvc).toFixed(1)), status: "NOMINAL" },
+
+            // Retain legacy keys for compatibility
             bmp280: { temp_c: baroTemp, pressure_hpa: baroPress, altitude_m: Math.round(alt_m), status: "NOMINAL" },
             mpu9250: { pitch_deg: pitch, roll_deg: roll, yaw_deg: yaw, gyro_x, gyro_y, gyro_z, status: "NOMINAL" },
             dht11: { temp_int_c: temp_int, humidity_pct: hum, status: "NOMINAL" },
             neo6m: { lat, lon, alt_m: Math.round(alt_m), satellites: sats, status: "3D_FIX" },
             hw072_ldr: { solar_kw, raw_adc: ldr_raw, lux: ldr_lux, status: "ACTIVE" },
+            ov7670: { frame_id: telemetryState.camera?.frame_id || 1, status: "ACTIVE" },
             last_hex_frame: generateHexTelemetryPayload(telemetryState),
             last_decoded_time: Date.now()
         };
@@ -645,7 +778,21 @@ function pushHistory(state) {
         ascent_spd: state.flight ? state.flight.ascent_speed_ms : 0,
         descent_spd: state.flight ? state.flight.descent_speed_ms : 0,
         vert_spd: state.flight ? state.flight.vertical_speed_ms : 0,
-        phase: state.flight ? state.flight.phase : 'ASCENT'
+        phase: state.flight ? state.flight.phase : 'ASCENT',
+        tmp117_temp: state.sensors?.tmp117?.temp_c,
+        ms5611_press: state.sensors?.ms5611?.pressure_hpa,
+        ms5611_alt: state.sensors?.ms5611?.altitude_m,
+        hdc3022_hum: state.sensors?.hdc3022?.humidity_pct,
+        hdc3022_temp: state.sensors?.hdc3022?.temp_c,
+        hdc3022_dew: state.sensors?.hdc3022?.dew_point_c,
+        ulpsm_o3: state.sensors?.ulpsm_o3?.ozone_ppb,
+        as7331_uvi: state.sensors?.as7331?.uv_index,
+        as7331_uva: state.sensors?.as7331?.uva_mw_m2,
+        as7331_uvb: state.sensors?.as7331?.uvb_mw_m2,
+        as7331_uvc: state.sensors?.as7331?.uvc_mw_m2,
+        lsm9ds1_gyro_x: state.sensors?.lsm9ds1?.gyro_x,
+        lsm9ds1_gyro_y: state.sensors?.lsm9ds1?.gyro_y,
+        lsm9ds1_gyro_z: state.sensors?.lsm9ds1?.gyro_z
     };
 
     telemetryHistory.push(entry);
@@ -1797,6 +1944,12 @@ function resetTelemetryToZero() {
     telemetryState.gps.alt_km = 0.0;
     telemetryState.gps.velocity_kms = 0.0;
     telemetryState.gps.satellites = 0;
+    telemetryState.sensors.tmp117 = { temp_c: 0.0, alert_status: "NOMINAL", accuracy_c: 0.1, status: "STANDBY" };
+    telemetryState.sensors.ms5611 = { pressure_hpa: 0.0, altitude_m: 0, temp_c: 0.0, vert_spd_ms: 0.0, status: "STANDBY" };
+    telemetryState.sensors.hdc3022 = { humidity_pct: 0.0, temp_c: 0.0, dew_point_c: 0.0, status: "STANDBY" };
+    telemetryState.sensors.lsm9ds1 = { pitch_deg: 0.0, roll_deg: 0.0, yaw_deg: 0.0, gyro_x: 0.0, gyro_y: 0.0, gyro_z: 0.0, accel_x: 0.0, accel_y: 0.0, accel_z: 1.0, accel_mag_g: 1.0, mag_x: 0.22, mag_y: -0.15, mag_z: 0.42, status: "STANDBY" };
+    telemetryState.sensors.ulpsm_o3 = { ozone_ppb: 0.0, ozone_ppm: 0.0, v_gas_mv: 1200, baseline_ppb: 35.0, status: "STANDBY" };
+    telemetryState.sensors.as7331 = { uva_mw_m2: 0.0, uvb_mw_m2: 0.0, uvc_mw_m2: 0.0, uv_index: 0.0, total_irradiance: 0.0, status: "STANDBY" };
     telemetryState.sensors.bmp280 = { temp_c: 0.0, pressure_hpa: 0.0, altitude_m: 0, status: "STANDBY" };
     telemetryState.sensors.mpu9250 = { pitch_deg: 0.0, roll_deg: 0.0, yaw_deg: 0.0, gyro_x: 0.0, gyro_y: 0.0, gyro_z: 0.0, status: "STANDBY" };
     telemetryState.sensors.dht11 = { temp_int_c: 0.0, humidity_pct: 0.0, status: "STANDBY" };

@@ -811,6 +811,111 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
+        // ===================================================================
+        // 6 SCIENTIFIC SENSORS TELEMETRY (SCREEN 1)
+        // TMP117, MS5611-01BA03, HDC3022, LSM9DS1, ULPSM-03, AS7331
+        // ===================================================================
+
+        // 1. TMP117 High-Precision Digital Temperature (±0.1°C NIST Accuracy)
+        const tmp117 = data.sensors?.tmp117;
+        const tmp117Temp = (tmp117?.temp_c !== undefined) ? tmp117.temp_c : (data.external ? data.external.temp_c : 24.0);
+        setElText('val-tmp117-temp', `${tmp117Temp > 0 ? '+' : ''}${tmp117Temp.toFixed(1)}`);
+        setElText('table-tmp117-temp', `${tmp117Temp > 0 ? '+' : ''}${tmp117Temp.toFixed(2)}°C`);
+        setElText('val-tmp117-status', tmp117?.status || 'NOMINAL');
+
+        // 2. MS5611-01BA03 High-Resolution Barometric Pressure & Altimeter
+        const ms5611 = data.sensors?.ms5611;
+        const ms5611Press = (ms5611?.pressure_hpa !== undefined) ? ms5611.pressure_hpa : (data.external ? data.external.pressure_hpa : 1013.2);
+        const ms5611Alt = (ms5611?.altitude_m !== undefined) ? ms5611.altitude_m : (data.flight ? Math.round(data.flight.altitude_m) : 0);
+        const ms5611Vz = (ms5611?.vert_spd_ms !== undefined) ? ms5611.vert_spd_ms : (data.flight ? data.flight.vertical_speed_ms : 0.0);
+        setElText('val-ms5611-press', `${ms5611Press.toFixed(1)}`);
+        setElText('val-ms5611-alt', `${ms5611Alt.toLocaleString()} m`);
+        setElText('val-ms5611-vz', `${ms5611Vz > 0 ? '+' : ''}${ms5611Vz.toFixed(1)} m/s`);
+        setElText('table-ms5611-press', `${ms5611Press.toFixed(1)} hPa`);
+
+        // 3. HDC3022 Precision Humidity & Temperature
+        const hdc = data.sensors?.hdc3022;
+        const hdcHum = (hdc?.humidity_pct !== undefined) ? hdc.humidity_pct : (data.external ? data.external.humidity_pct : 48.0);
+        const hdcTemp = (hdc?.temp_c !== undefined) ? hdc.temp_c : 22.0;
+        const hdcDew = (hdc?.dew_point_c !== undefined) ? hdc.dew_point_c : 10.5;
+        setElText('val-hdc3022-hum', `${hdcHum.toFixed(1)}`);
+        setElText('val-hdc3022-temp', `${hdcTemp.toFixed(1)}°C`);
+        setElText('val-hdc3022-dew', `${hdcDew.toFixed(1)}°C`);
+        setElText('table-hdc3022-hum', `${hdcHum.toFixed(1)}%`);
+
+        // 4. LSM9DS1 9-DoF IMU & Euler Kinematics
+        const lsm = data.sensors?.lsm9ds1 || data.motion;
+        const lsmPitch = lsm?.pitch_deg !== undefined ? lsm.pitch_deg : (data.motion?.pitch_deg || 0);
+        const lsmRoll = lsm?.roll_deg !== undefined ? lsm.roll_deg : (data.motion?.roll_deg || 0);
+        const lsmYaw = lsm?.yaw_deg !== undefined ? lsm.yaw_deg : (data.motion?.yaw_deg || 0);
+        const lsmAccelX = lsm?.accel_x !== undefined ? lsm.accel_x : 0.04;
+        const lsmAccelY = lsm?.accel_y !== undefined ? lsm.accel_y : 0.03;
+        const lsmAccelZ = lsm?.accel_z !== undefined ? lsm.accel_z : (data.flight ? data.flight.vertical_accel_g : 1.0);
+        const lsmGyroX = lsm?.gyro_x !== undefined ? lsm.gyro_x : (data.motion?.gyro_x_dps || 0);
+        const lsmGyroY = lsm?.gyro_y !== undefined ? lsm.gyro_y : (data.motion?.gyro_y_dps || 0);
+        const lsmGyroZ = lsm?.gyro_z !== undefined ? lsm.gyro_z : (data.motion?.gyro_z_dps || 0);
+        const lsmMagX = lsm?.mag_x !== undefined ? lsm.mag_x : 0.22;
+        const lsmMagY = lsm?.mag_y !== undefined ? lsm.mag_y : -0.15;
+        const lsmMagZ = lsm?.mag_z !== undefined ? lsm.mag_z : 0.42;
+        const lsmGNorm = Math.sqrt(lsmAccelX**2 + lsmAccelY**2 + lsmAccelZ**2).toFixed(2);
+
+        setElText('val-lsm9ds1-angles', `P: ${lsmPitch.toFixed(1)}° • R: ${lsmRoll.toFixed(1)}°`);
+        setElText('val-lsm9ds1-yaw', `${lsmYaw.toFixed(1)}°`);
+        setElText('val-lsm9ds1-g', `${lsmGNorm} G`);
+        setElText('val-lsm-accel-xyz', `${lsmAccelX.toFixed(2)}, ${lsmAccelY.toFixed(2)}, ${lsmAccelZ.toFixed(2)} G`);
+        setElText('val-lsm-gyro-xyz', `${lsmGyroX.toFixed(1)}, ${lsmGyroY.toFixed(1)}, ${lsmGyroZ.toFixed(1)} °/s`);
+        setElText('val-lsm-mag-xyz', `${lsmMagX.toFixed(2)}, ${lsmMagY.toFixed(2)}, ${lsmMagZ.toFixed(2)} Gauss`);
+        setElText('val-lsm-pitch', `${lsmPitch.toFixed(1)}°`);
+        setElText('val-lsm-roll', `${lsmRoll.toFixed(1)}°`);
+        setElText('val-lsm-yaw', `${lsmYaw.toFixed(1)}°`);
+        setElText('lsm-vector-norm', `${lsmGNorm} G VECTOR`);
+
+        // 5. ULPSM-03 Stratospheric Ozone
+        const ulpsm = data.sensors?.ulpsm_o3;
+        const o3Ppb = ulpsm?.ozone_ppb !== undefined ? ulpsm.ozone_ppb : 35.0;
+        const o3Vgas = ulpsm?.v_gas_mv !== undefined ? ulpsm.v_gas_mv : 1230;
+        const o3Ppm = ulpsm?.ozone_ppm !== undefined ? ulpsm.ozone_ppm : 0.035;
+        setElText('val-ulpsm-o3', `${o3Ppb.toFixed(1)}`);
+        setElText('val-ulpsm-vgas', `${o3Vgas.toLocaleString()} mV`);
+        setElText('val-ulpsm-ppm', `${o3Ppm.toFixed(4)} ppm`);
+        setElText('val-o3-ppb-readout', `${o3Ppb.toFixed(1)}`);
+        setElText('val-o3-vgas-readout', `${o3Vgas.toLocaleString()}`);
+        setElStyleWidth('bar-o3', `${Math.min(100, Math.max(5, (o3Ppb / 600.0) * 100))}%`);
+
+        // 6. AS7331 Spectral 3-Channel UV Radiometer
+        const as7331 = data.sensors?.as7331;
+        const uvi = as7331?.uv_index !== undefined ? as7331.uv_index : 3.0;
+        const uva = as7331?.uva_mw_m2 !== undefined ? as7331.uva_mw_m2 : 24.0;
+        const uvb = as7331?.uvb_mw_m2 !== undefined ? as7331.uvb_mw_m2 : 1.2;
+        const uvc = as7331?.uvc_mw_m2 !== undefined ? as7331.uvc_mw_m2 : 0.0;
+        setElText('val-as7331-uvi', `${uvi.toFixed(1)}`);
+        setElText('val-as7331-uva', `${uva.toFixed(1)}`);
+        setElText('val-as7331-uvb', `${uvb.toFixed(1)}`);
+        setElText('val-as7331-uvc', `${uvc.toFixed(1)}`);
+        setElText('val-uva-readout', `${uva.toFixed(1)}`);
+        setElText('val-uvb-readout', `${uvb.toFixed(1)}`);
+        setElText('val-uvc-readout', `${uvc.toFixed(1)}`);
+        setElStyleWidth('bar-uva', `${Math.min(100, Math.max(5, (uva / 80.0) * 100))}%`);
+        setElStyleWidth('bar-uvb', `${Math.min(100, Math.max(5, (uvb / 25.0) * 100))}%`);
+        setElStyleWidth('bar-uvc', `${Math.min(100, Math.max(2, (uvc / 4.0) * 100))}%`);
+
+        // Camera Screen & Downlink HUD (Screen 2)
+        const altM = data.flight ? data.flight.altitude_m : (data.gps ? Math.round(data.gps.alt_km * 1000) : 0);
+        cameraAltCached = altM;
+        setElText('cam-hud-alt', `${Math.round(altM).toLocaleString()} m`);
+        if (data.camera) {
+            setElText('cam-hud-exp', `${(data.camera.exposure_ms || 32.5).toFixed(1)} ms`);
+            setElText('cam-frame-id', data.camera.frame_id || 1);
+        }
+        setElText('cam-hud-timestamp', `UTC ${new Date().toISOString().substr(11, 8)}`);
+
+        // Mission Profile Readouts (Screen 2)
+        if (data.flight) {
+            const vz = data.flight.vertical_speed_ms || 0;
+            setElText('val-profile-vz', `${vz > 0 ? '+' : ''}${vz.toFixed(1)} m/s`);
+            setElText('nav-screen-phase-badge', data.flight.phase_label || data.flight.phase);
+        }
+
         // Sensor Suite (BMP280, MPU9250, DHT11, NEO-6M, HW-072 LDR)
         // 1. BMP280 Sensor (External Temp, Pressure, Altitude)
         const bmpTemp = (data.sensors?.bmp280?.temp_c !== undefined) ? data.sensors.bmp280.temp_c : (data.external ? data.external.temp_c : 0.0);
@@ -1448,7 +1553,126 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnRefresh = document.getElementById('btn-refresh-ports');
     if (btnRefresh) {
         btnRefresh.addEventListener('click', () => {
-            fetchSerialPorts();
+            
+    // -------------------------------------------------------------------
+    // 8. STRATOSPHERIC PAYLOAD CAMERA DOWNLINK RENDERER (SCREEN 2)
+    // -------------------------------------------------------------------
+    const camCanvas = document.getElementById('cam-stream-canvas');
+    let camCtx = camCanvas ? camCanvas.getContext('2d') : null;
+    let cameraSimFrame = 0;
+    let cameraAltCached = 1045;
+
+    function renderStratosphericCamera() {
+        if (!camCtx || !camCanvas) return;
+        cameraSimFrame++;
+
+        const width = camCanvas.width;
+        const height = camCanvas.height;
+
+        // Space background (deep cosmos black)
+        camCtx.fillStyle = '#020508';
+        camCtx.fillRect(0, 0, width, height);
+
+        // Starfield (twinkling in upper space region)
+        for (let i = 0; i < 40; i++) {
+            const sx = (i * 97 + cameraSimFrame * 0.1) % width;
+            const sy = (i * 61) % (height * 0.52);
+            const twinkle = 0.4 + 0.6 * Math.sin(cameraSimFrame * 0.05 + i);
+            camCtx.fillStyle = `rgba(255, 255, 255, ${twinkle * 0.8})`;
+            camCtx.fillRect(sx, sy, (i % 3 === 0) ? 2 : 1, (i % 3 === 0) ? 2 : 1);
+        }
+
+        // Earth Horizon Curvature based on altitude (0 to 30,000m)
+        const altFrac = Math.min(1.0, Math.max(0.0, cameraAltCached / 30000.0));
+        const horizonY = height * 0.45 + (altFrac * 22);
+        const curveDepth = 30 + (altFrac * 55);
+
+        // Stratospheric Atmospheric Limb Glow (electric cyan/blue gradient)
+        const glowGrad = camCtx.createLinearGradient(0, horizonY - 20, 0, horizonY + 8);
+        glowGrad.addColorStop(0, 'rgba(0, 240, 255, 0)');
+        glowGrad.addColorStop(0.5, 'rgba(0, 220, 255, 0.42)');
+        glowGrad.addColorStop(0.85, 'rgba(30, 144, 255, 0.65)');
+        glowGrad.addColorStop(1, 'rgba(10, 80, 180, 0.85)');
+
+        camCtx.fillStyle = glowGrad;
+        camCtx.beginPath();
+        camCtx.moveTo(0, horizonY - 18);
+        camCtx.quadraticCurveTo(width * 0.5, horizonY - 18 - curveDepth * 0.25, width, horizonY - 18);
+        camCtx.lineTo(width, horizonY + 12);
+        camCtx.quadraticCurveTo(width * 0.5, horizonY + 12 + curveDepth * 0.25, 0, horizonY + 12);
+        camCtx.closePath();
+        camCtx.fill();
+
+        // Earth Surface Body
+        const earthGrad = camCtx.createLinearGradient(0, horizonY, 0, height);
+        earthGrad.addColorStop(0, '#0D4B75');
+        earthGrad.addColorStop(0.35, '#165B64');
+        earthGrad.addColorStop(0.7, '#184D3B');
+        earthGrad.addColorStop(1, '#0F3024');
+
+        camCtx.fillStyle = earthGrad;
+        camCtx.beginPath();
+        camCtx.moveTo(0, horizonY);
+        camCtx.quadraticCurveTo(width * 0.5, horizonY + curveDepth, width, horizonY);
+        camCtx.lineTo(width, height);
+        camCtx.lineTo(0, height);
+        camCtx.closePath();
+        camCtx.fill();
+
+        // Drifting Cloud Decks & Ocean Specular Texture
+        for (let c = 0; c < 5; c++) {
+            const cx = ((cameraSimFrame * 0.6) + c * 140) % (width + 120) - 60;
+            const cy = horizonY + 22 + (c * 24);
+            const cw = 90 + (c * 20);
+            const ch = 12 + (c * 4);
+            camCtx.fillStyle = `rgba(245, 250, 255, ${0.25 - c * 0.04})`;
+            camCtx.beginPath();
+            camCtx.ellipse(cx, cy, cw, ch, -0.05, 0, Math.PI * 2);
+            camCtx.fill();
+        }
+
+        // Sun Flare / Corona in upper right corner
+        const sunX = width * 0.82;
+        const sunY = height * 0.18;
+        const sunGrad = camCtx.createRadialGradient(sunX, sunY, 2, sunX, sunY, 90);
+        sunGrad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+        sunGrad.addColorStop(0.15, 'rgba(255, 248, 220, 0.7)');
+        sunGrad.addColorStop(0.4, 'rgba(0, 210, 255, 0.25)');
+        sunGrad.addColorStop(1, 'rgba(0, 210, 255, 0)');
+        camCtx.fillStyle = sunGrad;
+        camCtx.beginPath();
+        camCtx.arc(sunX, sunY, 90, 0, Math.PI * 2);
+        camCtx.fill();
+
+        // Reticle Center Crosshair
+        camCtx.strokeStyle = 'rgba(0, 255, 180, 0.25)';
+        camCtx.lineWidth = 1;
+        camCtx.beginPath();
+        camCtx.moveTo(width * 0.5 - 15, height * 0.5);
+        camCtx.lineTo(width * 0.5 + 15, height * 0.5);
+        camCtx.moveTo(width * 0.5, height * 0.5 - 15);
+        camCtx.lineTo(width * 0.5, height * 0.5 + 15);
+        camCtx.stroke();
+    }
+
+    // Run camera render loop at 30 fps
+    setInterval(renderStratosphericCamera, 33);
+
+    // Snapshot trigger button
+    const btnSnapCamera = document.getElementById('btn-snap-camera');
+    if (btnSnapCamera) {
+        btnSnapCamera.addEventListener('click', async () => {
+            if (camCtx && camCanvas) {
+                camCtx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                camCtx.fillRect(0, 0, camCanvas.width, camCanvas.height);
+            }
+            try {
+                await fetch('/api/camera/trigger', { method: 'POST' });
+            } catch (e) {}
+        });
+    }
+
+    fetchSerialPorts();
             if (ws && ws.readyState === WebSocket.OPEN) {
                 ws.send(JSON.stringify({ command: 'LORA_LIST_PORTS' }));
             }
