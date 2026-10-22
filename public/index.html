@@ -20,7 +20,7 @@
     <!-- FontAwesome Fallback for legacy controls -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
-    <!-- Custom SaaS Design System Stylesheet -->
+    <!-- Custom Full-Width SaaS Design System Stylesheet -->
     <link rel="stylesheet" href="css/style.css">
 </head>
 
@@ -29,12 +29,12 @@
     <div class="app-shell">
 
         <!-- ====================================================================
-             5. SIDEBAR DESIGN (230 px Fixed, White, Delicate Border)
+             HEADER: INTEGRATED BRAND, STATUS & MISSION CONTROLS (FULL WIDTH)
              ==================================================================== -->
-        <aside class="app-sidebar" id="app-sidebar">
-            <div class="sidebar-top-flow">
-                <!-- Brand / Station Badge -->
-                <div class="sidebar-brand-box">
+        <header class="app-header">
+            <div class="header-brand-and-title">
+                <!-- Station Brand Badge -->
+                <div class="header-brand-badge">
                     <div class="brand-icon-sq">
                         <i data-lucide="satellite"></i>
                     </div>
@@ -44,544 +44,436 @@
                     </div>
                 </div>
 
-                <!-- Navigation Group: Telemetry & Orbit -->
-                <div class="sidebar-group">
-                    <span class="sidebar-group-title">Telemetry & Orbit</span>
-                    <ul class="sidebar-menu-list">
-                        <li class="sidebar-menu-item active">
-                            <a href="#overview" class="sidebar-menu-link active">
-                                <div class="menu-link-inner">
-                                    <i data-lucide="layout-grid"></i>
-                                    <span>Flight overview</span>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="sidebar-menu-item">
-                            <a href="#gps-section" class="sidebar-menu-link">
-                                <div class="menu-link-inner">
-                                    <i data-lucide="map-pin"></i>
-                                    <span>GPS orbital track</span>
-                                </div>
-                                <span class="nav-badge-pill num-tabular" id="nav-chip-gps">FIX (10)</span>
-                            </a>
-                        </li>
-                        <li class="sidebar-menu-item">
-                            <a href="#attitude-section" class="sidebar-menu-link">
-                                <div class="menu-link-inner">
-                                    <i data-lucide="box"></i>
-                                    <span>3D attitude visualizer</span>
-                                </div>
-                                <span class="nav-badge-pill">1 RU GLB</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-
-                <!-- Navigation Group: Avionics & RF -->
-                <div class="sidebar-group">
-                    <span class="sidebar-group-title">Avionics & RF</span>
-                    <ul class="sidebar-menu-list">
-                        <li class="sidebar-menu-item">
-                            <a href="#sensors-section" class="sidebar-menu-link">
-                                <div class="menu-link-inner">
-                                    <i data-lucide="activity"></i>
-                                    <span>Sensors & EPS</span>
-                                </div>
-                                <span class="nav-badge-pill num-tabular" id="nav-chip-batt">92%</span>
-                            </a>
-                        </li>
-                        <li class="sidebar-menu-item">
-                            <a href="#charts-section" class="sidebar-menu-link">
-                                <div class="menu-link-inner">
-                                    <i data-lucide="line-chart"></i>
-                                    <span>Telemetry dynamics</span>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="sidebar-menu-item">
-                            <a href="#terminal-trigger" class="sidebar-menu-link" id="sidebar-terminal-link">
-                                <div class="menu-link-inner">
-                                    <i data-lucide="radio"></i>
-                                    <span>LoRa 440 MHz link</span>
-                                </div>
-                                <span class="nav-badge-pill num-tabular" id="footer-lora-port">COM7</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-
-                <!-- Navigation Group: Operations -->
-                <div class="sidebar-group">
-                    <span class="sidebar-group-title">Operations</span>
-                    <ul class="sidebar-menu-list">
-                        <li class="sidebar-menu-item">
-                            <a href="#stages-section" class="sidebar-menu-link">
-                                <div class="menu-link-inner">
-                                    <i data-lucide="layers"></i>
-                                    <span>Flight sequence</span>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="sidebar-menu-item">
-                            <a href="#obc-trigger" class="sidebar-menu-link" id="sidebar-obc-link">
-                                <div class="menu-link-inner">
-                                    <i data-lucide="cpu"></i>
-                                    <span>OBC compiler</span>
-                                </div>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Mission Altitude Goal Card in Sidebar Bottom -->
-            <div class="sidebar-mission-card">
-                <div class="mission-card-top">
-                    <span class="mission-card-title">Target apogee</span>
-                    <span class="mission-badge num-tabular">30,000 m</span>
-                </div>
-                <div class="mission-card-amount num-tabular">
-                    <span id="nav-chip-alt" style="font-size:15px; font-weight:700; color:var(--text-primary);">0 m</span>
-                    <span>ASL target</span>
-                </div>
-                <div class="slim-track">
-                    <div class="slim-fill-green" id="sidebar-altitude-progress" style="width: 4%;"></div>
-                </div>
-                <div class="mission-helper-text">
-                    <span class="num-tabular" id="sidebar-apogee-remain">30,000 m to target</span>
-                    <span class="num-tabular" id="nav-chip-phase">ASCENT</span>
-                </div>
-            </div>
-        </aside>
-
-        <!-- ====================================================================
-             6. HEADER DESIGN & MAIN VIEWPORT
-             ==================================================================== -->
-        <div class="main-viewport">
-
-            <!-- Compact Header (64 px Height) -->
-            <header class="app-header">
+                <!-- Page Title & Coordinates Metadata -->
                 <div class="header-title-group">
-                    <h1 class="page-title">Mission Control — ALPHA-GS1</h1>
+                    <h1 class="page-title">Mission Control Dashboard</h1>
                     <div class="page-subtitle-row">
-                        <span>440.000 MHz UHF Telemetry</span>
+                        <span>Live 440 MHz UHF Telemetry</span>
                         <span>•</span>
                         <span>Ground Station: <span class="num-tabular">30.768776° N, 76.573955° E</span> (Locked)</span>
                     </div>
-                </div>
-
-                <div class="header-controls-group">
-                    <!-- MET & UTC Timers -->
-                    <div class="timer-pill-box" title="Mission Elapsed Time (HH:MM:SS)">
-                        <i data-lucide="stopwatch"></i>
-                        <span>MET: <span class="timer-num num-tabular" id="met-timer">00:00:00</span></span>
-                    </div>
-                    <div class="timer-pill-box" title="Universal Coordinated Time (UTC)">
-                        <i data-lucide="clock"></i>
-                        <span class="timer-num num-tabular" id="utc-timer">00:00:00</span>
-                    </div>
-
-                    <!-- Source Pill & Status -->
-                    <div class="status-pill" id="source-badge">
-                        SIMULATOR
-                    </div>
-                    <div class="status-pill" title="Hardware Activity Status">
-                        <span class="status-dot-pulse" id="status-dot"></span>
-                        <span id="status-text">DATA RECEIVING</span>
-                    </div>
-
-                    <!-- Mission Control Action Buttons -->
-                    <button class="btn-control-secondary" id="btn-replay-header" title="Replay launch profile sequence from T-0 (Pad)">
-                        <i data-lucide="rotate-ccw"></i>
-                        <span>Replay T-0</span>
-                    </button>
-                    <button class="btn-control-secondary" id="btn-reset-dash" title="Reset all telemetry metrics to standby">
-                        <i data-lucide="refresh-cw"></i>
-                        <span>Reset</span>
-                    </button>
-                    <button class="btn-control-secondary" id="btn-toggle-source" title="Toggle between LoRa Live Mode and Flight Simulator">
-                        <i data-lucide="radio"></i>
-                        <span>Sim / Live</span>
-                    </button>
-
-                    <!-- LoRa Serial Connection -->
-                    <select id="lora-port-select" class="lora-select-control">
-                        <option value="COM7" selected>COM7</option>
-                        <option value="">Select Port...</option>
-                    </select>
-                    <button id="btn-lora-connect" class="btn-control-primary" title="Connect to hardware serial receiver">
-                        <i data-lucide="plug"></i>
-                        <span id="btn-lora-connect-label">Connect</span>
-                        <span class="status-dot-pulse" id="lora-pulse-dot" style="display:none; background:#FFFFFF;"></span>
-                    </button>
-                    <button id="btn-inject-test-pkt" class="btn-control-secondary btn-icon-sq" title="Inject Test Telemetry Packet">
-                        <i data-lucide="zap"></i>
-                    </button>
-                    <button id="btn-open-terminal" class="btn-control-secondary btn-icon-sq" title="Open LoRa Terminal & OBC Firmware Compiler">
-                        <i data-lucide="terminal"></i>
-                    </button>
-                </div>
-            </header>
-
-            <!-- ================================================================
-                 4. MAIN CONTENT AREA (KPI Row + 2-Column Analytics Area)
-                 ================================================================ -->
-            <main class="main-content-flow">
-
-                <!-- Section Header -->
-                <div class="section-subhead-bar">
-                    <h2 class="section-head-title">Spacecraft telemetry & telemetry dynamics</h2>
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        <span class="badge-kpi-trend trend-green num-tabular" id="pipeline-active-badge">ASCENT GUIDANCE</span>
+                    <div class="header-meta-chips">
+                        <span class="badge-kpi-trend trend-green num-tabular" id="nav-chip-gps">FIX (10 SATS)</span>
+                        <span class="badge-kpi-trend trend-blue num-tabular" id="nav-chip-alt">0 m</span>
+                        <span class="badge-kpi-trend trend-purple num-tabular" id="nav-chip-batt">100%</span>
+                        <span class="badge-kpi-trend trend-amber num-tabular" id="nav-chip-phase">ASCENT</span>
                     </div>
                 </div>
+            </div>
 
-                <!-- ------------------------------------------------------------
-                     7. FOUR KPI CARDS IN A SINGLE ROW
-                     ------------------------------------------------------------ -->
-                <section class="kpi-row-grid">
-                    <!-- KPI 1: Altitude (ASL) -->
-                    <div class="kpi-card">
-                        <div class="kpi-card-head">
-                            <span class="kpi-label">Altitude (ASL)</span>
-                            <span class="badge-kpi-trend trend-green num-tabular" id="status-alt-climb">
-                                <i data-lucide="trending-up" style="width:12px; height:12px;"></i>
-                                CLIMBING
-                            </span>
+            <!-- Header Controls & Timers -->
+            <div class="header-controls-group">
+                <!-- MET & UTC Timers -->
+                <div class="timer-pill-box" title="Mission Elapsed Time (HH:MM:SS)">
+                    <i data-lucide="stopwatch"></i>
+                    <span>MET: <span class="timer-num num-tabular" id="met-timer">00:00:00</span></span>
+                </div>
+                <div class="timer-pill-box" title="Universal Coordinated Time (UTC)">
+                    <i data-lucide="clock"></i>
+                    <span class="timer-num num-tabular" id="utc-timer">00:00:00</span>
+                </div>
+
+                <!-- Source Pill & Status -->
+                <div class="status-pill" id="source-badge">
+                    SIMULATOR
+                </div>
+                <div class="status-pill" title="Hardware Activity Status">
+                    <span class="status-dot-pulse" id="status-dot"></span>
+                    <span id="status-text">DATA RECEIVING</span>
+                </div>
+
+                <!-- Mission Control Action Buttons -->
+                <button class="btn-control-secondary" id="btn-replay-header" title="Replay launch profile sequence from T-0 (Pad)">
+                    <i data-lucide="rotate-ccw"></i>
+                    <span>Replay T-0</span>
+                </button>
+                <button class="btn-control-secondary" id="btn-reset-dash" title="Reset all telemetry metrics to standby">
+                    <i data-lucide="refresh-cw"></i>
+                    <span>Reset</span>
+                </button>
+                <button class="btn-control-secondary" id="btn-toggle-source" title="Toggle between LoRa Live Mode and Flight Simulator">
+                    <i data-lucide="radio"></i>
+                    <span>Sim / Live</span>
+                </button>
+
+                <!-- LoRa Serial Connection -->
+                <select id="lora-port-select" class="lora-select-control">
+                    <option value="COM7" selected>COM7</option>
+                    <option value="">Select Port...</option>
+                </select>
+                <button id="btn-lora-connect" class="btn-control-primary" title="Connect to hardware serial receiver">
+                    <i data-lucide="plug"></i>
+                    <span id="btn-lora-connect-label">Connect</span>
+                    <span class="status-dot-pulse" id="lora-pulse-dot" style="display:none; background:#FFFFFF;"></span>
+                </button>
+                <button id="btn-inject-test-pkt" class="btn-control-secondary btn-icon-sq" title="Inject Test Telemetry Packet">
+                    <i data-lucide="zap"></i>
+                </button>
+                <button id="btn-open-terminal" class="btn-control-secondary btn-icon-sq" title="Open LoRa Terminal & OBC Firmware Compiler">
+                    <i data-lucide="terminal"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- ================================================================
+             MAIN CONTENT AREA (FULL-WIDTH, WRAP-FRIENDLY GRID)
+             ================================================================ -->
+        <main class="main-content-flow">
+
+            <!-- Section Header -->
+            <div class="section-subhead-bar">
+                <h2 class="section-head-title">Spacecraft Telemetry Overview & Flight Dynamics</h2>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span class="badge-kpi-trend trend-green num-tabular" id="pipeline-active-badge">ASCENT GUIDANCE</span>
+                </div>
+            </div>
+
+            <!-- ------------------------------------------------------------
+                 FOUR KPI CARDS IN A SINGLE ROW (WITH WRAPPING TEXT)
+                 ------------------------------------------------------------ -->
+            <section class="kpi-row-grid">
+                <!-- KPI 1: Altitude (ASL) -->
+                <div class="kpi-card">
+                    <div class="kpi-card-head">
+                        <span class="kpi-label">Altitude (ASL)</span>
+                        <span class="badge-kpi-trend trend-green num-tabular" id="status-alt-climb">
+                            <i data-lucide="trending-up" style="width:12px; height:12px;"></i>
+                            CLIMBING
+                        </span>
+                    </div>
+                    <div class="kpi-num-wrap">
+                        <div class="kpi-num num-tabular"><span id="val-flight-alt">0</span> m</div>
+                    </div>
+                    <span class="kpi-helper num-tabular">Target apogee: <span id="val-apogee-target">30,000</span> m • Sensor: <span id="val-bmp-alt">0 m</span></span>
+                </div>
+
+                <!-- KPI 2: Vertical Velocity -->
+                <div class="kpi-card">
+                    <div class="kpi-card-head">
+                        <span class="kpi-label">Vertical speed</span>
+                        <span class="badge-kpi-trend trend-blue num-tabular" id="badge-ascent-state">
+                            <i data-lucide="arrow-up-right" style="width:12px; height:12px;"></i>
+                            ASCENT
+                        </span>
+                    </div>
+                    <div class="kpi-num-wrap">
+                        <div class="kpi-num num-tabular"><span id="val-ascent-speed">0.0</span> m/s</div>
+                    </div>
+                    <span class="kpi-helper num-tabular"><span id="val-ascent-kmh">0.0 km/h</span> • Vz Rate: <span id="nav-chip-vz">+0.0 m/s</span></span>
+                </div>
+
+                <!-- KPI 3: EPS & Battery Bus -->
+                <div class="kpi-card">
+                    <div class="kpi-card-head">
+                        <span class="kpi-label">Battery & EPS status</span>
+                        <span class="badge-kpi-trend trend-purple num-tabular" id="val-eclipse">
+                            <i data-lucide="sun" style="width:12px; height:12px;"></i>
+                            DAYLIGHT
+                        </span>
+                    </div>
+                    <div class="kpi-num-wrap">
+                        <div class="kpi-num num-tabular" id="val-battery-pct">0.0%</div>
+                    </div>
+                    <span class="kpi-helper num-tabular">Bus: <span id="val-batt-volt">0.00 V</span> • Solar Panel: <span id="val-solar-kw">0.000</span> kW</span>
+                </div>
+
+                <!-- KPI 4: RF Link Quality -->
+                <div class="kpi-card">
+                    <div class="kpi-card-head">
+                        <span class="kpi-label">440 MHz link quality</span>
+                        <span class="badge-kpi-trend trend-amber num-tabular" id="rf-freq-badge">
+                            <i data-lucide="radio" style="width:12px; height:12px;"></i>
+                            440.000 MHz
+                        </span>
+                    </div>
+                    <div class="kpi-num-wrap">
+                        <div class="kpi-num num-tabular" id="val-rf-quality">0%</div>
+                    </div>
+                    <span class="kpi-helper num-tabular">RSSI: <span id="val-rssi">0.0</span> dBm • SNR: <span id="val-snr">0.0</span> dB • Packets: <span id="val-packets">0</span></span>
+                </div>
+            </section>
+
+            <!-- ------------------------------------------------------------
+                 TWO-COLUMN ANALYTICS AREA (FULL-WIDTH RESPONSIVE)
+                 ------------------------------------------------------------ -->
+            <section class="analytics-two-col">
+
+                <!-- LEFT COLUMN: GPS Map, Telemetry Charts & Hex Frame Stream -->
+                <div class="col-left-flow">
+
+                    <!-- CARD 1: GPS Orbital Track & Footprint Map -->
+                    <div class="saas-panel-card" id="gps-section">
+                        <div class="card-title-row">
+                            <div class="card-title-group">
+                                <h3 class="card-h3">GPS orbital track & ground station footprint</h3>
+                                <span class="card-caption">ALPHA-GS1 reference origin (30.768776° N, 76.573955° E) • NEO-6M fixed position</span>
+                            </div>
+                            <span class="badge-kpi-trend trend-blue num-tabular" id="gps-sats-tag">NEO-6M (10 SATS)</span>
                         </div>
-                        <div class="kpi-num-wrap">
-                            <div class="kpi-num num-tabular"><span id="val-flight-alt">0</span> m</div>
+
+                        <!-- Map Canvas -->
+                        <div id="gps-map" class="map-canvas-container"></div>
+
+                        <!-- Map HUD Statistics Strip -->
+                        <div class="hud-stat-strip">
+                            <div class="hud-item-pill">
+                                <span>LAT:</span>
+                                <strong class="num-tabular" id="map-lat">30.768776°</strong>
+                            </div>
+                            <div class="hud-item-pill">
+                                <span>LON:</span>
+                                <strong class="num-tabular" id="map-lon">76.573955°</strong>
+                            </div>
+                            <div class="hud-item-pill">
+                                <span>ALT:</span>
+                                <strong class="num-tabular" id="map-alt">0.0 km</strong>
+                            </div>
+                            <div class="hud-item-pill">
+                                <span>SPD:</span>
+                                <strong class="num-tabular" id="map-spd">0.00 km/s</strong>
+                            </div>
+                            <div class="hud-item-pill">
+                                <span>FIX:</span>
+                                <strong class="num-tabular" id="map-sats">10 FIX</strong>
+                            </div>
                         </div>
-                        <span class="kpi-helper num-tabular">Target apogee: <span id="val-apogee-target">30,000</span> m • <span id="val-bmp-alt">0 m</span></span>
                     </div>
 
-                    <!-- KPI 2: Vertical Velocity -->
-                    <div class="kpi-card">
-                        <div class="kpi-card-head">
-                            <span class="kpi-label">Vertical speed</span>
-                            <span class="badge-kpi-trend trend-blue num-tabular" id="badge-ascent-state">
-                                <i data-lucide="arrow-up-right" style="width:12px; height:12px;"></i>
-                                ASCENT
-                            </span>
+                    <!-- CARD 2: Sensor Dynamics & Telemetry Charts -->
+                    <div class="saas-panel-card" id="charts-section">
+                        <div class="card-title-row">
+                            <div class="card-title-group">
+                                <h3 class="card-h3">Telemetry sensor dynamics & profile</h3>
+                                <span class="card-caption">Real-time barometric atmospheric lapse rate, cabin thermal, and EPS power</span>
+                            </div>
                         </div>
-                        <div class="kpi-num-wrap">
-                            <div class="kpi-num num-tabular"><span id="val-ascent-speed">0.0</span> m/s</div>
+
+                        <!-- Chart Legend Strip -->
+                        <div class="chart-legend-strip">
+                            <div class="legend-item">
+                                <span class="legend-dot-sq dot-green"></span>
+                                <span>Altitude / Ext temp (BMP280)</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-dot-sq dot-blue"></span>
+                                <span>Cabin temp / Humidity (DHT11)</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-dot-sq dot-purple"></span>
+                                <span>Solar flux (HW-072 LDR)</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-dot-sq dot-amber"></span>
+                                <span>Battery storage %</span>
+                            </div>
                         </div>
-                        <span class="kpi-helper num-tabular"><span id="val-ascent-kmh">0.0 km/h</span> • Vz: <span id="nav-chip-vz">+0.0 m/s</span></span>
+
+                        <!-- Charts Grid (2x2 Duo Layout) -->
+                        <div class="charts-grid-duo">
+                            <!-- Chart 1: BMP280 Altitude & External Temp -->
+                            <div class="chart-frame-box">
+                                <canvas id="chart-external"></canvas>
+                            </div>
+
+                            <!-- Chart 2: DHT11 Cabin Internal Temp & Humidity -->
+                            <div class="chart-frame-box">
+                                <canvas id="chart-internal"></canvas>
+                            </div>
+
+                            <!-- Chart 3: HW-072 LDR Solar & EPS Battery -->
+                            <div class="chart-frame-box">
+                                <canvas id="chart-power"></canvas>
+                            </div>
+
+                            <!-- Chart 4: IMU 9-DOF Gyroscope & Dynamics -->
+                            <div class="chart-frame-box">
+                                <canvas id="chart-motion"></canvas>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- KPI 3: EPS & Battery Bus -->
-                    <div class="kpi-card">
-                        <div class="kpi-card-head">
-                            <span class="kpi-label">Battery & EPS</span>
-                            <span class="badge-kpi-trend trend-purple num-tabular" id="val-eclipse">
-                                <i data-lucide="sun" style="width:12px; height:12px;"></i>
-                                DAYLIGHT
-                            </span>
+                    <!-- CARD 3: Hexadecimal Live Telemetry Stream -->
+                    <div class="saas-panel-card">
+                        <div class="card-title-row">
+                            <div class="card-title-group">
+                                <h3 class="card-h3">CCSDS space packet & hexadecimal frame stream</h3>
+                                <span class="card-caption">Direct demodulated byte array from 440.000 MHz UHF carrier</span>
+                            </div>
+                            <span class="badge-kpi-trend trend-green num-tabular" id="hex-status-badge">HEX DECODED</span>
                         </div>
-                        <div class="kpi-num-wrap">
-                            <div class="kpi-num num-tabular" id="val-battery-pct">0.0%</div>
+
+                        <div class="hex-strip-box">
+                            <div class="hex-strip-label">
+                                <span>Demodulated Byte Buffer Stream</span>
+                                <span class="num-tabular" id="footer-lora-port">Port: COM7 @ 9600 baud</span>
+                            </div>
+                            <div class="hex-stream-text num-tabular" id="hex-code-stream">
+                                5AA5 0801 C0BA 002D 6AD9 46D5 CA3D F894 0000 A9B2 3119 02C2 5B20 1C01 1801 724D
+                            </div>
                         </div>
-                        <span class="kpi-helper num-tabular">Bus: <span id="val-batt-volt">0.00 V</span> • Solar: <span id="val-solar-kw">0.000</span> kW</span>
                     </div>
 
-                    <!-- KPI 4: RF Link Quality -->
-                    <div class="kpi-card">
-                        <div class="kpi-card-head">
-                            <span class="kpi-label">440 MHz link quality</span>
-                            <span class="badge-kpi-trend trend-amber num-tabular" id="rf-freq-badge">
-                                <i data-lucide="radio" style="width:12px; height:12px;"></i>
-                                440.000 MHz
-                            </span>
-                        </div>
-                        <div class="kpi-num-wrap">
-                            <div class="kpi-num num-tabular" id="val-rf-quality">0%</div>
-                        </div>
-                        <span class="kpi-helper num-tabular">RSSI: <span id="val-rssi">0.0</span> dBm • SNR: <span id="val-snr">0.0</span> dB</span>
-                    </div>
-                </section>
+                </div>
 
-                <!-- ------------------------------------------------------------
-                     TWO-COLUMN ANALYTICS AREA BELOW KPI ROW
-                     ------------------------------------------------------------ -->
-                <section class="analytics-two-col">
+                <!-- RIGHT COLUMN: 3D CubeSat Model, Flight Stages & Avionics Diagnostics -->
+                <div class="col-right-flow">
 
-                    <!-- LEFT COLUMN: GPS Map, Telemetry Charts & Hex Frame Stream -->
-                    <div class="col-left-flow">
-
-                        <!-- CARD 1: GPS Orbital Track & Footprint Map -->
-                        <div class="saas-panel-card" id="gps-section">
-                            <div class="card-title-row">
-                                <div class="card-title-group">
-                                    <h3 class="card-h3">GPS orbital track & ground station footprint</h3>
-                                    <span class="card-caption">ALPHA-GS1 reference origin (30.768776° N, 76.573955° E) • NEO-6M fixed</span>
-                                </div>
-                                <span class="badge-kpi-trend trend-blue num-tabular" id="gps-sats-tag">NEO-6M (10 SATS)</span>
+                    <!-- CARD 1: 3D Satellite Attitude Orientation (ADCS) -->
+                    <div class="saas-panel-card" id="attitude-section">
+                        <div class="card-title-row">
+                            <div class="card-title-group">
+                                <h3 class="card-h3">3D spacecraft attitude orientation</h3>
+                                <span class="card-caption">Real-time MPU-9250 IMU kinematic attitude visualizer</span>
                             </div>
-
-                            <!-- Map Canvas -->
-                            <div id="gps-map" class="map-canvas-container"></div>
-
-                            <!-- Map HUD Statistics Strip -->
-                            <div class="hud-stat-strip">
-                                <div class="hud-item-pill">
-                                    <span>LAT:</span>
-                                    <strong class="num-tabular" id="map-lat">30.768776°</strong>
-                                </div>
-                                <div class="hud-item-pill">
-                                    <span>LON:</span>
-                                    <strong class="num-tabular" id="map-lon">76.573955°</strong>
-                                </div>
-                                <div class="hud-item-pill">
-                                    <span>ALT:</span>
-                                    <strong class="num-tabular" id="map-alt">0.0 km</strong>
-                                </div>
-                                <div class="hud-item-pill">
-                                    <span>SPD:</span>
-                                    <strong class="num-tabular" id="map-spd">0.00 km/s</strong>
-                                </div>
-                                <div class="hud-item-pill">
-                                    <span>FIX:</span>
-                                    <strong class="num-tabular" id="map-sats">10 FIX</strong>
-                                </div>
+                            <div style="display:flex; align-items:center; gap:6px;">
+                                <span class="badge-kpi-trend trend-green" id="model-format-tag">1 RU GENERIC GLB</span>
+                                <button class="btn-control-secondary btn-icon-sq" id="btn-reset-3d" title="Reset Camera Viewpoint">
+                                    <i data-lucide="camera"></i>
+                                </button>
                             </div>
                         </div>
 
-                        <!-- CARD 2: Sensor Dynamics & Telemetry Charts -->
-                        <div class="saas-panel-card" id="charts-section">
-                            <div class="card-title-row">
-                                <div class="card-title-group">
-                                    <h3 class="card-h3">Telemetry sensor dynamics & profile</h3>
-                                    <span class="card-caption">Real-time barometric atmospheric lapse rate, cabin thermal, and EPS power</span>
-                                </div>
+                        <!-- Three.js Canvas Container -->
+                        <div id="cubesat-3d-canvas" class="three-canvas-frame"></div>
+
+                        <!-- Attitude Angle Readouts -->
+                        <div class="attitude-metrics-grid">
+                            <div class="attitude-stat-card">
+                                <span class="attitude-stat-lbl">Pitch</span>
+                                <span class="attitude-stat-val num-tabular" id="val-pitch">0.0°</span>
                             </div>
-
-                            <!-- Chart Legend Strip -->
-                            <div class="chart-legend-strip">
-                                <div class="legend-item">
-                                    <span class="legend-dot-sq dot-green"></span>
-                                    <span>Altitude / Ext temp (BMP280)</span>
-                                </div>
-                                <div class="legend-item">
-                                    <span class="legend-dot-sq dot-blue"></span>
-                                    <span>Cabin temp / Humidity (DHT11)</span>
-                                </div>
-                                <div class="legend-item">
-                                    <span class="legend-dot-sq dot-purple"></span>
-                                    <span>Solar flux (HW-072 LDR)</span>
-                                </div>
-                                <div class="legend-item">
-                                    <span class="legend-dot-sq dot-amber"></span>
-                                    <span>Battery storage %</span>
-                                </div>
+                            <div class="attitude-stat-card">
+                                <span class="attitude-stat-lbl">Roll</span>
+                                <span class="attitude-stat-val num-tabular" id="val-roll">0.0°</span>
                             </div>
-
-                            <!-- Charts Grid (2x2 Duo Layout) -->
-                            <div class="charts-grid-duo">
-                                <!-- Chart 1: BMP280 Altitude & External Temp -->
-                                <div class="chart-frame-box">
-                                    <canvas id="chart-external"></canvas>
-                                </div>
-
-                                <!-- Chart 2: DHT11 Cabin Internal Temp & Humidity -->
-                                <div class="chart-frame-box">
-                                    <canvas id="chart-internal"></canvas>
-                                </div>
-
-                                <!-- Chart 3: HW-072 LDR Solar & EPS Battery -->
-                                <div class="chart-frame-box">
-                                    <canvas id="chart-power"></canvas>
-                                </div>
-
-                                <!-- Chart 4: IMU 9-DOF Gyroscope & Dynamics -->
-                                <div class="chart-frame-box">
-                                    <canvas id="chart-motion"></canvas>
-                                </div>
+                            <div class="attitude-stat-card">
+                                <span class="attitude-stat-lbl">Yaw</span>
+                                <span class="attitude-stat-val num-tabular" id="val-yaw">0.0°</span>
                             </div>
                         </div>
 
-                        <!-- CARD 3: Hexadecimal Live Telemetry Stream -->
-                        <div class="saas-panel-card">
-                            <div class="card-title-row">
-                                <div class="card-title-group">
-                                    <h3 class="card-h3">CCSDS space packet & hexadecimal frame stream</h3>
-                                    <span class="card-caption">Direct demodulated byte array from 440.000 MHz UHF carrier</span>
-                                </div>
-                                <span class="badge-kpi-trend trend-green num-tabular" id="hex-status-badge">HEX DECODED</span>
+                        <div class="hud-stat-strip" style="margin-top:8px;">
+                            <div class="hud-item-pill">
+                                <span>ADCS:</span>
+                                <strong id="val-adcs-status">SUN POINTING</strong>
                             </div>
-
-                            <div class="hex-strip-box">
-                                <div class="hex-strip-label">
-                                    <span>Raw Byte Buffer</span>
-                                    <span class="num-tabular" id="val-packets">0 packets</span>
-                                </div>
-                                <div class="hex-stream-text num-tabular" id="hex-code-stream">
-                                    5AA5 0801 C0BA 002D 6AD9 46D5 CA3D F894 0000 A9B2 3119 02C2 5B20 1C01 1801 724D
-                                </div>
+                            <div class="hud-item-pill">
+                                <span>Gyro:</span>
+                                <strong class="num-tabular" id="val-gyro-xyz">0.0, 0.0, 0.0 °/s</strong>
                             </div>
                         </div>
-
                     </div>
 
-                    <!-- RIGHT COLUMN: 3D CubeSat Model, Flight Stages & Avionics Diagnostics -->
-                    <div class="col-right-flow">
+                    <!-- CARD 2: Flight Sequence & Stage Progress -->
+                    <div class="saas-panel-card" id="stages-section">
+                        <div class="card-title-row">
+                            <div class="card-title-group">
+                                <h3 class="card-h3">Flight profile & sequence stages</h3>
+                                <span class="card-caption">Ascent milestones and parachute recovery sequence</span>
+                            </div>
+                            <span class="badge-kpi-trend trend-green num-tabular" id="badge-flight-phase">LAUNCH PAD (T-0)</span>
+                        </div>
 
-                        <!-- CARD 1: 3D Satellite Attitude Orientation (ADCS) -->
-                        <div class="saas-panel-card" id="attitude-section">
-                            <div class="card-title-row">
-                                <div class="card-title-group">
-                                    <h3 class="card-h3">3D spacecraft attitude orientation</h3>
-                                    <span class="card-caption">Real-time MPU-9250 IMU kinematic attitude visualizer</span>
+                        <div class="flight-stages-list">
+                            <div class="stage-item-row">
+                                <div class="stage-meta-head">
+                                    <span class="stage-name">1. Launch pad liftoff</span>
+                                    <span class="stage-val num-tabular">T-0 to T+6s (Pad)</span>
                                 </div>
-                                <div style="display:flex; align-items:center; gap:6px;">
-                                    <span class="badge-kpi-trend trend-green" id="model-format-tag">1 RU GENERIC GLB</span>
-                                    <button class="btn-control-secondary btn-icon-sq" id="btn-reset-3d" title="Reset Camera Viewpoint">
-                                        <i data-lucide="camera"></i>
-                                    </button>
+                                <div class="track-progress-slim">
+                                    <div class="fill-progress-green" style="width: 100%;"></div>
                                 </div>
                             </div>
 
-                            <!-- Three.js Canvas Container -->
-                            <div id="cubesat-3d-canvas" class="three-canvas-frame"></div>
-
-                            <!-- Attitude Angle Readouts -->
-                            <div class="attitude-metrics-grid">
-                                <div class="attitude-stat-card">
-                                    <span class="attitude-stat-lbl">Pitch</span>
-                                    <span class="attitude-stat-val num-tabular" id="val-pitch">0.0°</span>
+                            <div class="stage-item-row">
+                                <div class="stage-meta-head">
+                                    <span class="stage-name">2. Powered ascent guidance</span>
+                                    <span class="stage-val num-tabular">> 1,000 m (Up to 82.5 m/s)</span>
                                 </div>
-                                <div class="attitude-stat-card">
-                                    <span class="attitude-stat-lbl">Roll</span>
-                                    <span class="attitude-stat-val num-tabular" id="val-roll">0.0°</span>
-                                </div>
-                                <div class="attitude-stat-card">
-                                    <span class="attitude-stat-lbl">Yaw</span>
-                                    <span class="attitude-stat-val num-tabular" id="val-yaw">0.0°</span>
+                                <div class="track-progress-slim">
+                                    <div class="fill-progress-green" id="sidebar-altitude-progress" style="width: 85%;"></div>
                                 </div>
                             </div>
 
-                            <div class="hud-stat-strip" style="margin-top:8px;">
-                                <div class="hud-item-pill">
-                                    <span>ADCS:</span>
-                                    <strong id="val-adcs-status">SUN POINTING</strong>
+                            <div class="stage-item-row">
+                                <div class="stage-meta-head">
+                                    <span class="stage-name">3. Target apogee reached</span>
+                                    <span class="stage-val num-tabular" id="sidebar-apogee-remain">30,000 m peak</span>
                                 </div>
-                                <div class="hud-item-pill">
-                                    <span>Gyro:</span>
-                                    <strong class="num-tabular" id="val-gyro-xyz">0.0, 0.0, 0.0 °/s</strong>
+                                <div class="track-progress-slim">
+                                    <div class="fill-progress-green" style="width: 70%;"></div>
+                                </div>
+                            </div>
+
+                            <div class="stage-item-row">
+                                <div class="stage-meta-head">
+                                    <span class="stage-name">4. Canopy recovery descent</span>
+                                    <span class="stage-val num-tabular">Terminal: -7.8 m/s</span>
+                                </div>
+                                <div class="track-progress-slim">
+                                    <div class="fill-progress-green" style="width: 40%;"></div>
+                                </div>
+                            </div>
+
+                            <div class="stage-item-row">
+                                <div class="stage-meta-head">
+                                    <span class="stage-name">5. Touchdown & recovery</span>
+                                    <span class="stage-val num-tabular">Ground Safe</span>
+                                </div>
+                                <div class="track-progress-slim">
+                                    <div class="fill-progress-green" style="width: 15%;"></div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- CARD 2: Flight Sequence & Stage Progress -->
-                        <div class="saas-panel-card" id="stages-section">
-                            <div class="card-title-row">
-                                <div class="card-title-group">
-                                    <h3 class="card-h3">Flight profile & sequence stages</h3>
-                                    <span class="card-caption">Ascent milestones and parachute recovery sequence</span>
-                                </div>
-                                <span class="badge-kpi-trend trend-green num-tabular" id="badge-flight-phase">LAUNCH PAD (T-0)</span>
-                            </div>
-
-                            <div class="flight-stages-list">
-                                <div class="stage-item-row">
-                                    <div class="stage-meta-head">
-                                        <span class="stage-name">1. Launch pad liftoff</span>
-                                        <span class="stage-val num-tabular">T-0 to T+6s (Pad)</span>
-                                    </div>
-                                    <div class="track-progress-slim">
-                                        <div class="fill-progress-green" style="width: 100%;"></div>
-                                    </div>
-                                </div>
-
-                                <div class="stage-item-row">
-                                    <div class="stage-meta-head">
-                                        <span class="stage-name">2. Powered ascent guidance</span>
-                                        <span class="stage-val num-tabular">> 1,000 m (Up to 82.5 m/s)</span>
-                                    </div>
-                                    <div class="track-progress-slim">
-                                        <div class="fill-progress-green" style="width: 85%;"></div>
-                                    </div>
-                                </div>
-
-                                <div class="stage-item-row">
-                                    <div class="stage-meta-head">
-                                        <span class="stage-name">3. Target apogee reached</span>
-                                        <span class="stage-val num-tabular">30,000 m peak</span>
-                                    </div>
-                                    <div class="track-progress-slim">
-                                        <div class="fill-progress-green" style="width: 70%;"></div>
-                                    </div>
-                                </div>
-
-                                <div class="stage-item-row">
-                                    <div class="stage-meta-head">
-                                        <span class="stage-name">4. Canopy recovery descent</span>
-                                        <span class="stage-val num-tabular">Terminal: -7.8 m/s</span>
-                                    </div>
-                                    <div class="track-progress-slim">
-                                        <div class="fill-progress-green" style="width: 40%;"></div>
-                                    </div>
-                                </div>
-
-                                <div class="stage-item-row">
-                                    <div class="stage-meta-head">
-                                        <span class="stage-name">5. Touchdown & recovery</span>
-                                        <span class="stage-val num-tabular">Ground Safe</span>
-                                    </div>
-                                    <div class="track-progress-slim">
-                                        <div class="fill-progress-green" style="width: 15%;"></div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Recovery Strip -->
-                            <div class="recovery-status-strip">
-                                <span class="recovery-strip-title">Recovery Canopy: <span id="badge-parachute">ARMED</span></span>
-                                <div class="recovery-strip-tags">
-                                    <span class="badge-kpi-trend trend-green num-tabular" id="val-pyro-status">PYRO: ARMED</span>
-                                </div>
+                        <!-- Recovery Strip -->
+                        <div class="recovery-status-strip">
+                            <span class="recovery-strip-title">Recovery Canopy: <span id="badge-parachute">ARMED</span></span>
+                            <div class="recovery-strip-tags">
+                                <span class="badge-kpi-trend trend-green num-tabular" id="val-pyro-status">PYRO: ARMED</span>
+                                <span class="badge-kpi-trend trend-blue num-tabular" id="val-g-force">1.0 G</span>
                             </div>
                         </div>
-
-                        <!-- CARD 3: Avionics Subsystems & Sensor Telemetry -->
-                        <div class="saas-panel-card" id="sensors-section">
-                            <div class="card-title-row">
-                                <div class="card-title-group">
-                                    <h3 class="card-h3">Avionics & optical diagnostics</h3>
-                                    <span class="card-caption">Direct sensor telemetry telemetry readout</span>
-                                </div>
-                            </div>
-
-                            <div class="avionics-metrics-list">
-                                <div class="avionics-row">
-                                    <span class="avionics-row-title"><i data-lucide="sun" style="width:14px; height:14px;"></i> HW-072 LDR optical</span>
-                                    <span class="avionics-row-val num-tabular"><span id="val-ldr-lux">0</span> Lux (<span id="val-ldr-adc">0</span> / 1023)</span>
-                                </div>
-                                <div class="avionics-row">
-                                    <span class="avionics-row-title"><i data-lucide="thermometer" style="width:14px; height:14px;"></i> BMP280 baro sensor</span>
-                                    <span class="avionics-row-val num-tabular"><span id="val-temp-ext">0.0</span>°C • <span id="val-press-ext">1013.2</span> hPa</span>
-                                </div>
-                                <div class="avionics-row">
-                                    <span class="avionics-row-title"><i data-lucide="home" style="width:14px; height:14px;"></i> DHT11 cabin avionics</span>
-                                    <span class="avionics-row-val num-tabular"><span id="val-temp-int">0.0</span>°C • <span id="val-hum-int">0.0%</span> RH</span>
-                                </div>
-                                <div class="avionics-row">
-                                    <span class="avionics-row-title"><i data-lucide="cpu" style="width:14px; height:14px;"></i> OBC CPU core & bus</span>
-                                    <span class="avionics-row-val num-tabular"><span id="val-temp-cpu">0.0°C</span> • <span id="val-board-volt">3.30 V</span></span>
-                                </div>
-                                <div class="avionics-row">
-                                    <span class="avionics-row-title"><i data-lucide="radio" style="width:14px; height:14px;"></i> 440 MHz RF receiver</span>
-                                    <span class="avionics-row-val num-tabular">Doppler: <span id="val-rf-doppler">0.0 Hz</span> • <span id="val-bmp-status">NOMINAL</span></span>
-                                </div>
-                            </div>
-                        </div>
-
                     </div>
 
-                </section>
+                    <!-- CARD 3: Avionics Subsystems & Sensor Telemetry -->
+                    <div class="saas-panel-card" id="sensors-section">
+                        <div class="card-title-row">
+                            <div class="card-title-group">
+                                <h3 class="card-h3">Avionics & optical diagnostics</h3>
+                                <span class="card-caption">Direct sensor telemetry telemetry readout</span>
+                            </div>
+                        </div>
 
-            </main>
-        </div>
+                        <div class="avionics-metrics-list">
+                            <div class="avionics-row">
+                                <span class="avionics-row-title"><i data-lucide="sun" style="width:14px; height:14px;"></i> HW-072 LDR optical</span>
+                                <span class="avionics-row-val num-tabular"><span id="val-ldr-lux">0</span> Lux (<span id="val-ldr-adc">0</span> / 1023)</span>
+                            </div>
+                            <div class="avionics-row">
+                                <span class="avionics-row-title"><i data-lucide="thermometer" style="width:14px; height:14px;"></i> BMP280 baro sensor</span>
+                                <span class="avionics-row-val num-tabular"><span id="val-temp-ext">0.0</span>°C • <span id="val-press-ext">1013.2</span> hPa</span>
+                            </div>
+                            <div class="avionics-row">
+                                <span class="avionics-row-title"><i data-lucide="home" style="width:14px; height:14px;"></i> DHT11 cabin avionics</span>
+                                <span class="avionics-row-val num-tabular"><span id="val-temp-int">0.0</span>°C • <span id="val-hum-int">0.0%</span> RH</span>
+                            </div>
+                            <div class="avionics-row">
+                                <span class="avionics-row-title"><i data-lucide="cpu" style="width:14px; height:14px;"></i> OBC CPU core & bus</span>
+                                <span class="avionics-row-val num-tabular"><span id="val-temp-cpu">0.0°C</span> • <span id="val-board-volt">3.30 V</span></span>
+                            </div>
+                            <div class="avionics-row">
+                                <span class="avionics-row-title"><i data-lucide="radio" style="width:14px; height:14px;"></i> 440 MHz RF receiver</span>
+                                <span class="avionics-row-val num-tabular">Doppler: <span id="val-rf-doppler">0.0 Hz</span> • Status: <span id="val-bmp-status">NOMINAL</span></span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </section>
+
+        </main>
 
     </div>
 
@@ -609,7 +501,7 @@
             <div class="modal-body-scroll">
                 <!-- Tab 1: Monitor -->
                 <div id="tab-view-monitor">
-                    <div style="display:flex; gap:6px; margin-bottom:8px;">
+                    <div style="display:flex; gap:6px; margin-bottom:8px; flex-wrap:wrap;">
                         <button class="btn-control-secondary" id="preset-freq-440">440.000 MHz</button>
                         <button class="btn-control-secondary" id="preset-sf-bw">SF7 / 125kHz</button>
                         <button class="btn-control-secondary" id="preset-at-ping">AT Ping</button>
@@ -619,15 +511,15 @@
                     <div class="terminal-pre" id="lora-terminal-window">
                         [GROUND STATION] Terminal ready. 440.000 MHz UHF carrier listening...
                     </div>
-                    <div style="display:flex; gap:8px; margin-top:10px;">
-                        <input type="text" id="lora-cmd-input" class="lora-select-control" style="flex:1;" placeholder="Enter AT command (e.g. AT+SEND=0,12,HELLO)">
+                    <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
+                        <input type="text" id="lora-cmd-input" class="lora-select-control" style="flex:1; min-width:200px;" placeholder="Enter AT command (e.g. AT+SEND=0,12,HELLO)">
                         <button class="btn-control-primary" id="btn-send-cmd">Transmit</button>
                     </div>
                 </div>
 
                 <!-- Tab 2: Compiler -->
                 <div id="tab-view-obc" style="display:none;">
-                    <div style="display:flex; gap:8px; margin-bottom:10px;">
+                    <div style="display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap;">
                         <select id="obc-board-select" class="lora-select-control">
                             <option value="arduino:avr:uno">Arduino Uno (ATMega328P)</option>
                             <option value="arduino:avr:nano">Arduino Nano</option>
@@ -699,48 +591,6 @@ void loop() {
         // Initialize Lucide Outline Icons
         if (window.lucide) {
             window.lucide.createIcons();
-        }
-
-        // Sidebar Navigation Links
-        document.querySelectorAll('.sidebar-menu-link').forEach(link => {
-            link.addEventListener('click', (e) => {
-                const targetId = link.getAttribute('href');
-                if (targetId && targetId.startsWith('#')) {
-                    const el = document.querySelector(targetId);
-                    if (el) {
-                        e.preventDefault();
-                        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
-                }
-                document.querySelectorAll('.sidebar-menu-link').forEach(l => {
-                    l.classList.remove('active');
-                    l.closest('.sidebar-menu-item')?.classList.remove('active');
-                });
-                link.classList.add('active');
-                link.closest('.sidebar-menu-item')?.classList.add('active');
-            });
-        });
-
-        // Sidebar links to modals
-        const terminalLink = document.getElementById('sidebar-terminal-link');
-        const obcLink = document.getElementById('sidebar-obc-link');
-        const modal = document.getElementById('lora-modal-overlay');
-        const tabMonitor = document.getElementById('modal-tab-monitor');
-        const tabCompiler = document.getElementById('modal-tab-compiler');
-
-        if (terminalLink && modal) {
-            terminalLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                modal.classList.add('active');
-                if (tabMonitor) tabMonitor.click();
-            });
-        }
-        if (obcLink && modal) {
-            obcLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                modal.classList.add('active');
-                if (tabCompiler) tabCompiler.click();
-            });
         }
     </script>
 </body>

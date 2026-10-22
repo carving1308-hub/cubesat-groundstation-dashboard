@@ -1,24 +1,14 @@
 /* ==========================================================================
-   CUBESAT GROUND STATION - PREMIUM SAAS DASHBOARD DESIGN SYSTEM
-   Based on the 14-Section UI Design Specification:
-   1. Overall: Minimal, elegant, whitespace-driven, flat with subtle depth
-   2. Colors:
-      - Main background: #F5F7F6
-      - Primary surface: #FFFFFF
-      - Primary text: #202622
-      - Secondary text: #515B55
-      - Muted text: #77817B
-      - Primary accent: #159B72
-      - Deep accent: #155E4B
-      - Pale accent background: #EAF5EF
-      - Secondary blue: #3989D8
-      - Secondary purple: #8B72E8
-      - Secondary amber: #D49A2A
-      - Border color: #E4E9E6
-      - Subtle surface: #F4F6F5
-      - Progress track background: #E9EEEB
-   3. Typography: Inter, sentence case headings, tabular numerals
-   4. Layout: 230px fixed sidebar, 64px header, 4 KPI cards row, 2-column analytics
+   CUBESAT GROUND STATION - PREMIUM FULL-WIDTH SAAS DASHBOARD
+   Specifications:
+   - Sidebar removed: Clean, full-width, centered main viewport
+   - Comprehensive text-wrapping: Zero text clipping, clean word breaks
+   - Palette: #F5F7F6 canvas, #FFFFFF cards/header, #159B72 primary green,
+              #155E4B deep green, #3989D8 blue, #8B72E8 purple, #D49A2A amber,
+              #202622 primary text, #515B55 secondary text, #77817B muted text,
+              #E4E9E6 borders, #F4F6F5 subtle surfaces, #E9EEEB tracks
+   - Typography: Inter, sentence case headings, tabular numerals
+   - Spacing: 8px scale, 12-16px card border-radius, soft 1px borders
    ========================================================================== */
 
 :root {
@@ -76,12 +66,11 @@
     --shadow-modal: 0 12px 36px rgba(25, 45, 35, 0.09);
 
     /* Shell Dimensions */
-    --sidebar-width: 230px;
-    --header-height: 64px;
+    --header-height: 68px;
 }
 
 /* --------------------------------------------------------------------------
-   BASE RESETS & DEFAULTS
+   BASE RESETS & UNIVERSAL TEXT-WRAPPING
    -------------------------------------------------------------------------- */
 *, *::before, *::after {
     box-sizing: border-box;
@@ -99,6 +88,33 @@ html, body {
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+}
+
+/* Universal Text Wrap & Anti-Overflow Rules */
+h1, h2, h3, h4, h5, h6,
+p, span, div, strong, label, a, td, th {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+}
+
+.text-wrap,
+.page-title,
+.page-subtitle-row,
+.card-h3,
+.card-caption,
+.kpi-label,
+.kpi-helper,
+.hud-item-pill,
+.stage-name,
+.stage-val,
+.avionics-row-title,
+.avionics-row-val,
+.attitude-stat-lbl,
+.attitude-stat-val {
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 
 /* Tabular Numerals for Numerical & Financial Data */
@@ -112,54 +128,62 @@ html, body {
 }
 
 /* --------------------------------------------------------------------------
-   APPLICATION SHELL LAYOUT
+   FULL-WIDTH APPLICATION SHELL (SIDEBAR REMOVED)
    -------------------------------------------------------------------------- */
 .app-shell {
     display: flex;
+    flex-direction: column;
     min-height: 100vh;
     width: 100%;
 }
 
-/* --------------------------------------------------------------------------
-   5. SIDEBAR DESIGN (230 px Fixed, White, 1px Border)
-   -------------------------------------------------------------------------- */
-.app-sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: var(--sidebar-width);
-    background-color: var(--surface-primary);
-    border-right: 1px solid var(--border-color);
+.main-viewport {
+    margin-left: 0;
+    width: 100%;
+    min-height: 100vh;
+    background-color: var(--bg-canvas);
     display: flex;
     flex-direction: column;
+}
+
+/* --------------------------------------------------------------------------
+   HEADER DESIGN (Full-Width, Wrap-Friendly, Aligned Grid)
+   -------------------------------------------------------------------------- */
+.app-header {
+    min-height: var(--header-height);
+    background-color: var(--surface-primary);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
     justify-content: space-between;
-    z-index: 100;
-    padding: var(--space-16) var(--space-12) var(--space-20) var(--space-12);
-    overflow-y: auto;
+    padding: var(--space-12) var(--space-32);
+    position: sticky;
+    top: 0;
+    z-index: 90;
+    flex-wrap: wrap;
+    gap: var(--space-12);
 }
 
-.app-sidebar::-webkit-scrollbar {
-    width: 4px;
-}
-.app-sidebar::-webkit-scrollbar-thumb {
-    background: var(--border-color);
-    border-radius: var(--radius-pill);
+.header-brand-and-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-16);
+    flex: 1 1 360px;
+    min-width: 0;
 }
 
-/* Brand Section */
-.sidebar-brand-box {
+.header-brand-badge {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: var(--space-4) var(--space-8) var(--space-20) var(--space-8);
-    border-bottom: 1px solid var(--border-color);
-    margin-bottom: var(--space-16);
+    padding-right: var(--space-16);
+    border-right: 1px solid var(--border-color);
+    flex-shrink: 0;
 }
 
 .brand-icon-sq {
-    width: 32px;
-    height: 32px;
+    width: 34px;
+    height: 34px;
     border-radius: var(--radius-md);
     background-color: var(--surface-active-nav);
     color: var(--accent-deep);
@@ -169,6 +193,13 @@ html, body {
     flex-shrink: 0;
 }
 
+.brand-icon-sq i,
+.brand-icon-sq svg {
+    width: 18px;
+    height: 18px;
+    stroke-width: 1.75;
+}
+
 .brand-text-col {
     display: flex;
     flex-direction: column;
@@ -176,241 +207,64 @@ html, body {
 
 .brand-title {
     font-size: 15px;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--text-primary);
     letter-spacing: -0.2px;
     line-height: 1.2;
 }
 
 .brand-sub {
-    font-size: 11px;
-    color: var(--text-muted);
-    font-weight: 500;
-}
-
-/* Navigation Groups */
-.sidebar-group {
-    margin-bottom: var(--space-20);
-}
-
-.sidebar-group-title {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    padding: 0 var(--space-8) var(--space-8) var(--space-8);
-    display: block;
-}
-
-.sidebar-menu-list {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.sidebar-menu-item {
-    width: 100%;
-}
-
-.sidebar-menu-link {
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 10px;
-    border-radius: var(--radius-md);
-    color: var(--text-secondary);
-    text-decoration: none;
-    font-size: 12.5px;
-    font-weight: 500;
-    transition: all 0.15s ease;
-}
-
-.menu-link-inner {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.menu-link-inner i,
-.menu-link-inner svg {
-    width: 16px;
-    height: 16px;
-    stroke-width: 1.75;
-    color: var(--text-muted);
-    flex-shrink: 0;
-}
-
-.sidebar-menu-link:hover {
-    background-color: var(--surface-subtle);
-    color: var(--text-primary);
-}
-
-.sidebar-menu-link:hover .menu-link-inner i,
-.sidebar-menu-link:hover .menu-link-inner svg {
-    color: var(--text-primary);
-}
-
-/* Active Nav Item */
-.sidebar-menu-item.active .sidebar-menu-link,
-.sidebar-menu-link.active {
-    background-color: var(--surface-active-nav);
-    color: var(--accent-deep);
-    font-weight: 600;
-}
-
-.sidebar-menu-item.active .sidebar-menu-link .menu-link-inner i,
-.sidebar-menu-item.active .sidebar-menu-link .menu-link-inner svg,
-.sidebar-menu-link.active .menu-link-inner i,
-.sidebar-menu-link.active .menu-link-inner svg {
-    color: var(--accent-deep);
-}
-
-/* Compact Nav Badges */
-.nav-badge-pill {
     font-size: 10.5px;
-    font-weight: 500;
-    padding: 1px 6px;
-    border-radius: var(--radius-pill);
-    background-color: var(--surface-subtle);
-    color: var(--text-muted);
-    border: 1px solid var(--border-color);
-}
-
-.sidebar-menu-item.active .nav-badge-pill {
-    background-color: #FFFFFF;
     color: var(--accent-deep);
-    border-color: #D1E7DC;
-}
-
-/* Mission Goal Card in Sidebar Bottom */
-.sidebar-mission-card {
-    background-color: var(--surface-subtle);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    padding: var(--space-12);
-    margin-top: auto;
-}
-
-.mission-card-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--space-8);
-}
-
-.mission-card-title {
-    font-size: 11.5px;
     font-weight: 600;
-    color: var(--text-primary);
-}
-
-.mission-badge {
-    font-size: 10px;
-    font-weight: 600;
-    color: var(--accent-primary);
-    background-color: var(--pill-green-bg);
-    padding: 1px 5px;
-    border-radius: var(--radius-pill);
-}
-
-.mission-card-amount {
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: var(--space-8);
-    display: flex;
-    align-items: baseline;
-    gap: 4px;
-}
-
-.mission-card-amount span {
-    font-size: 11px;
-    color: var(--text-muted);
-    font-weight: 400;
-}
-
-.slim-track {
-    width: 100%;
-    height: 6px;
-    background-color: var(--track-bg);
-    border-radius: var(--radius-pill);
-    overflow: hidden;
-    margin-bottom: var(--space-8);
-}
-
-.slim-fill-green {
-    height: 100%;
-    background-color: var(--accent-primary);
-    border-radius: var(--radius-pill);
-    transition: width 0.4s ease;
-}
-
-.mission-helper-text {
-    font-size: 10.5px;
-    color: var(--text-helper);
-    display: flex;
-    justify-content: space-between;
-}
-
-/* --------------------------------------------------------------------------
-   6. HEADER DESIGN (60–72 px Height, Clean Horizontal Grid)
-   -------------------------------------------------------------------------- */
-.main-viewport {
-    margin-left: var(--sidebar-width);
-    width: calc(100% - var(--sidebar-width));
-    min-height: 100vh;
-    background-color: var(--bg-canvas);
-    display: flex;
-    flex-direction: column;
-}
-
-.app-header {
-    height: var(--header-height);
-    background-color: var(--surface-primary);
-    border-bottom: 1px solid var(--border-color);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 var(--space-24);
-    position: sticky;
-    top: 0;
-    z-index: 90;
 }
 
 .header-title-group {
     display: flex;
     flex-direction: column;
+    min-width: 0;
 }
 
 .page-title {
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 600;
     color: var(--text-primary);
     letter-spacing: -0.3px;
-    line-height: 1.2;
+    line-height: 1.25;
+    white-space: normal;
 }
 
 .page-subtitle-row {
-    font-size: 12px;
+    font-size: 11.5px;
     color: var(--text-muted);
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 6px;
     margin-top: 2px;
+    line-height: 1.4;
+    white-space: normal;
+}
+
+.header-meta-chips {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
 }
 
 .header-controls-group {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 8px;
+    flex-shrink: 0;
 }
 
 /* Timer Display Badges */
 .timer-pill-box {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 6px;
     height: 34px;
@@ -420,6 +274,7 @@ html, body {
     border-radius: var(--radius-md);
     font-size: 11.5px;
     color: var(--text-secondary);
+    white-space: nowrap;
 }
 
 .timer-pill-box i,
@@ -427,6 +282,7 @@ html, body {
     width: 14px;
     height: 14px;
     color: var(--text-muted);
+    flex-shrink: 0;
 }
 
 .timer-num {
@@ -447,6 +303,7 @@ html, body {
     font-size: 11px;
     font-weight: 600;
     color: var(--text-primary);
+    white-space: nowrap;
 }
 
 .status-dot-pulse {
@@ -454,9 +311,10 @@ html, body {
     height: 7px;
     border-radius: 50%;
     background-color: var(--accent-primary);
+    flex-shrink: 0;
 }
 
-/* 11. Buttons & Controls */
+/* Buttons & Controls */
 .btn-control-secondary {
     height: 34px;
     padding: 0 12px;
@@ -471,6 +329,7 @@ html, body {
     align-items: center;
     gap: 6px;
     cursor: pointer;
+    white-space: nowrap;
     transition: all 0.15s ease;
 }
 
@@ -493,6 +352,7 @@ html, body {
     align-items: center;
     gap: 6px;
     cursor: pointer;
+    white-space: nowrap;
     transition: all 0.15s ease;
 }
 
@@ -504,9 +364,10 @@ html, body {
     width: 34px;
     height: 34px;
     padding: 0;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
 .lora-select-control {
@@ -522,10 +383,13 @@ html, body {
 }
 
 /* --------------------------------------------------------------------------
-   4. MAIN CONTENT AREA & 8px SPACING SYSTEM
+   MAIN CONTENT FLOW (FULL-WIDTH & SPACIOUS)
    -------------------------------------------------------------------------- */
 .main-content-flow {
-    padding: var(--space-20) var(--space-24) var(--space-32) var(--space-24);
+    padding: var(--space-24) var(--space-32) var(--space-32) var(--space-32);
+    width: 100%;
+    max-width: 1680px;
+    margin: 0 auto;
     display: flex;
     flex-direction: column;
     gap: var(--space-20);
@@ -536,16 +400,20 @@ html, body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-12);
 }
 
 .section-head-title {
     font-size: 16px;
     font-weight: 600;
     color: var(--text-primary);
+    white-space: normal;
+    overflow-wrap: break-word;
 }
 
 /* --------------------------------------------------------------------------
-   7. FOUR KPI CARDS IN A SINGLE ROW
+   FOUR KPI CARDS IN A SINGLE ROW (WRAPPING LABELS & FIGURES)
    -------------------------------------------------------------------------- */
 .kpi-row-grid {
     display: grid;
@@ -563,6 +431,7 @@ html, body {
     flex-direction: column;
     justify-content: space-between;
     transition: border-color 0.15s ease;
+    min-width: 0;
 }
 
 .kpi-card:hover {
@@ -572,7 +441,9 @@ html, body {
 .kpi-card-head {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 6px;
     margin-bottom: var(--space-12);
 }
 
@@ -580,6 +451,9 @@ html, body {
     font-size: 12.5px;
     font-weight: 500;
     color: var(--text-muted);
+    white-space: normal;
+    overflow-wrap: break-word;
+    flex: 1 1 120px;
 }
 
 .badge-kpi-trend {
@@ -590,6 +464,8 @@ html, body {
     display: inline-flex;
     align-items: center;
     gap: 3px;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .trend-green { background-color: var(--pill-green-bg); color: var(--accent-primary); }
@@ -605,22 +481,28 @@ html, body {
     font-size: 28px;
     font-weight: 700;
     color: var(--text-primary);
-    line-height: 1.1;
+    line-height: 1.15;
     letter-spacing: -0.5px;
+    word-break: break-word;
+    overflow-wrap: break-word;
 }
 
 .kpi-helper {
     font-size: 11px;
     color: var(--text-helper);
     font-weight: 400;
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    line-height: 1.4;
 }
 
 /* --------------------------------------------------------------------------
-   TWO-COLUMN ANALYTICS AREA BELOW KPI ROW
+   TWO-COLUMN ANALYTICS AREA (CLEAN WRAP-AROUND CARDS)
    -------------------------------------------------------------------------- */
 .analytics-two-col {
     display: grid;
-    grid-template-columns: 1.45fr 1fr;
+    grid-template-columns: 1.4fr 1fr;
     gap: var(--space-20);
     align-items: start;
 }
@@ -630,6 +512,7 @@ html, body {
     display: flex;
     flex-direction: column;
     gap: var(--space-20);
+    min-width: 0;
 }
 
 /* Card Surface Container */
@@ -639,31 +522,41 @@ html, body {
     border-radius: var(--radius-lg);
     padding: var(--space-20);
     box-shadow: var(--shadow-card);
+    min-width: 0;
 }
 
 .card-title-row {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 8px;
     margin-bottom: var(--space-16);
 }
 
 .card-title-group {
     display: flex;
     flex-direction: column;
+    flex: 1 1 240px;
+    min-width: 0;
 }
 
 .card-h3 {
     font-size: 15px;
     font-weight: 600;
     color: var(--text-primary);
-    line-height: 1.3;
+    line-height: 1.35;
+    white-space: normal;
+    overflow-wrap: break-word;
 }
 
 .card-caption {
     font-size: 11.5px;
     color: var(--text-muted);
     margin-top: 2px;
+    line-height: 1.4;
+    white-space: normal;
+    overflow-wrap: break-word;
 }
 
 /* --------------------------------------------------------------------------
@@ -671,7 +564,7 @@ html, body {
    -------------------------------------------------------------------------- */
 .map-canvas-container {
     width: 100%;
-    height: 280px;
+    height: 300px;
     border-radius: var(--radius-md);
     overflow: hidden;
     border: 1px solid var(--border-color);
@@ -697,6 +590,8 @@ html, body {
     border: 1px solid var(--border-color);
     border-radius: var(--radius-sm);
     color: var(--text-secondary);
+    white-space: normal;
+    overflow-wrap: break-word;
 }
 
 .hud-item-pill strong {
@@ -704,12 +599,13 @@ html, body {
 }
 
 /* --------------------------------------------------------------------------
-   9. CHARTS & DATA VISUALIZATION STYLING
+   CHARTS & DATA VISUALIZATION STYLING
    -------------------------------------------------------------------------- */
 .chart-legend-strip {
     display: flex;
     align-items: center;
-    gap: 14px;
+    flex-wrap: wrap;
+    gap: 12px;
     margin-bottom: var(--space-12);
 }
 
@@ -720,12 +616,14 @@ html, body {
     font-size: 11px;
     color: var(--text-muted);
     font-weight: 500;
+    white-space: normal;
 }
 
 .legend-dot-sq {
     width: 8px;
     height: 8px;
     border-radius: 50%;
+    flex-shrink: 0;
 }
 
 .dot-green { background-color: var(--accent-primary); }
@@ -742,13 +640,7 @@ html, body {
 .chart-frame-box {
     position: relative;
     width: 100%;
-    height: 160px;
-}
-
-.chart-frame-lg {
-    position: relative;
-    width: 100%;
-    height: 220px;
+    height: 170px;
 }
 
 /* Hex Stream Box */
@@ -760,7 +652,7 @@ html, body {
     border-radius: var(--radius-md);
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
 }
 
 .hex-strip-label {
@@ -770,6 +662,8 @@ html, body {
     text-transform: uppercase;
     display: flex;
     justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 4px;
 }
 
 .hex-stream-text {
@@ -777,7 +671,9 @@ html, body {
     font-size: 11px;
     color: var(--text-primary);
     word-break: break-all;
-    line-height: 1.4;
+    overflow-wrap: anywhere;
+    white-space: normal;
+    line-height: 1.6;
 }
 
 /* --------------------------------------------------------------------------
@@ -785,7 +681,7 @@ html, body {
    -------------------------------------------------------------------------- */
 .three-canvas-frame {
     width: 100%;
-    height: 240px;
+    height: 250px;
     border-radius: var(--radius-md);
     border: 1px solid var(--border-color);
     background-color: var(--surface-subtle);
@@ -807,12 +703,14 @@ html, body {
     border-radius: var(--radius-md);
     display: flex;
     flex-direction: column;
+    white-space: normal;
 }
 
 .attitude-stat-lbl {
     font-size: 10.5px;
     color: var(--text-muted);
     font-weight: 500;
+    white-space: normal;
 }
 
 .attitude-stat-val {
@@ -823,7 +721,7 @@ html, body {
 }
 
 /* --------------------------------------------------------------------------
-   10. PROGRESS INDICATORS & FLIGHT STAGES
+   PROGRESS INDICATORS & FLIGHT STAGES
    -------------------------------------------------------------------------- */
 .flight-stages-list {
     display: flex;
@@ -841,17 +739,22 @@ html, body {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
+    flex-wrap: wrap;
+    gap: 4px;
     font-size: 12px;
 }
 
 .stage-name {
     font-weight: 500;
     color: var(--text-primary);
+    white-space: normal;
+    overflow-wrap: break-word;
 }
 
 .stage-val {
     font-size: 11px;
     color: var(--text-muted);
+    white-space: normal;
 }
 
 .track-progress-slim {
@@ -878,17 +781,21 @@ html, body {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
 .recovery-strip-title {
     font-size: 12px;
     font-weight: 600;
     color: var(--accent-deep);
+    white-space: normal;
 }
 
 .recovery-strip-tags {
     display: flex;
     gap: 6px;
+    flex-wrap: wrap;
 }
 
 /* --------------------------------------------------------------------------
@@ -909,6 +816,8 @@ html, body {
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     font-size: 12px;
+    flex-wrap: wrap;
+    gap: 6px;
 }
 
 .avionics-row-title {
@@ -916,11 +825,16 @@ html, body {
     display: flex;
     align-items: center;
     gap: 6px;
+    white-space: normal;
+    overflow-wrap: break-word;
 }
 
 .avionics-row-val {
     font-weight: 600;
     color: var(--text-primary);
+    white-space: normal;
+    overflow-wrap: break-word;
+    text-align: right;
 }
 
 /* --------------------------------------------------------------------------
@@ -964,12 +878,15 @@ html, body {
     align-items: center;
     padding: var(--space-16) var(--space-20);
     border-bottom: 1px solid var(--border-color);
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
 .modal-heading {
     font-size: 16px;
     font-weight: 600;
     color: var(--text-primary);
+    white-space: normal;
 }
 
 .modal-nav-tabs {
@@ -978,6 +895,7 @@ html, body {
     padding: var(--space-8) var(--space-20);
     border-bottom: 1px solid var(--border-color);
     background-color: var(--surface-subtle);
+    flex-wrap: wrap;
 }
 
 .modal-tab-btn {
@@ -1018,6 +936,8 @@ html, body {
     height: 240px;
     overflow-y: auto;
     line-height: 1.5;
+    word-break: break-all;
+    white-space: pre-wrap;
 }
 
 .code-editor-area {
@@ -1032,19 +952,11 @@ html, body {
     padding: 10px;
     resize: vertical;
     outline: none;
-}
-
-.modal-bottom-bar {
-    padding: var(--space-12) var(--space-20);
-    border-top: 1px solid var(--border-color);
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-    background-color: var(--surface-subtle);
+    line-height: 1.5;
 }
 
 /* --------------------------------------------------------------------------
-   13. RESPONSIVE DESIGN
+   RESPONSIVE LAYOUT QUERIES
    -------------------------------------------------------------------------- */
 @media (max-width: 1200px) {
     .analytics-two-col {
@@ -1053,17 +965,15 @@ html, body {
     .kpi-row-grid {
         grid-template-columns: repeat(2, 1fr);
     }
+    .app-header {
+        padding: var(--space-12) var(--space-20);
+    }
+    .main-content-flow {
+        padding: var(--space-16) var(--space-20);
+    }
 }
 
 @media (max-width: 768px) {
-    .app-sidebar {
-        transform: translateX(-100%);
-        transition: transform 0.25s ease;
-    }
-    .main-viewport {
-        margin-left: 0;
-        width: 100%;
-    }
     .kpi-row-grid {
         grid-template-columns: 1fr;
     }
@@ -1071,9 +981,9 @@ html, body {
         grid-template-columns: 1fr;
     }
     .app-header {
-        padding: 0 var(--space-16);
+        padding: var(--space-12) var(--space-16);
     }
     .main-content-flow {
-        padding: var(--space-16);
+        padding: var(--space-12) var(--space-16);
     }
 }
